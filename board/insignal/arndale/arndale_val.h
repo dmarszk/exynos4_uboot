@@ -409,10 +409,10 @@
 
 /* CLK_SRC_PERIC0 */
 #define PWM_SEL		0
-#define UART3_SEL	6
-#define UART2_SEL	6
-#define UART1_SEL	6
-#define UART0_SEL	6
+#define UART3_SEL	0
+#define UART2_SEL	0
+#define UART1_SEL	0
+#define UART0_SEL	0
 /* SRC_CLOCK = SCLK_MPLL */
 #define CLK_SRC_PERIC0_VAL	((PWM_SEL << 24)        \
 				| (UART3_SEL << 12)     \
@@ -421,12 +421,12 @@
                                 | (UART0_SEL))
 
 /* CLK_DIV_PERIL0	*/
-#define UART5_RATIO	7
-#define UART4_RATIO	7
-#define UART3_RATIO	7
-#define UART2_RATIO	7
-#define UART1_RATIO	7
-#define UART0_RATIO	7
+#define UART5_RATIO	3
+#define UART4_RATIO	3
+#define UART3_RATIO	3
+#define UART2_RATIO	3
+#define UART1_RATIO	3
+#define UART0_RATIO	3
 
 #define CLK_DIV_PERIC0_VAL	((UART3_RATIO << 12)    \
 				| (UART2_RATIO << 8)    \
@@ -457,7 +457,7 @@
 
 #define SCLK_UART	MPLL_DEC / (UART1_RATIO+1)
 
-#define UART_UBRDIV_VAL	0x35    /* (SCLK_UART/(115200*16) -1) */
+#define UART_UBRDIV_VAL	0x2    /* (SCLK_UART/(115200*16) -1) */
 #define UART_UDIVSLOT_VAL 0x4   /*((((SCLK_UART*10/(115200*16) -10))%10)*16/10)*/
 
 #endif
