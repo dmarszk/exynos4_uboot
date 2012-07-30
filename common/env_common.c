@@ -129,6 +129,8 @@ uchar default_environment[] = {
 	"\0"
 };
 
+int default_environment_size = sizeof(default_environment);
+
 static uchar env_get_char_init (int index)
 {
 	uchar c;
