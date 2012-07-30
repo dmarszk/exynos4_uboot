@@ -12,7 +12,7 @@
 
 #include <common.h>
 #include <asm/arch/cpu.h>
-
+#include "arndale_val.h"
 #define Outp32(addr, data) (*(volatile u32 *)(addr) = (data))
 #define Inp32(addr) ((*(volatile u32 *)(addr)))
 
@@ -53,7 +53,7 @@ void CMU_SetMemClk(u32 nMEMCLK)
 	Outp32(0x10014104, uBits);			// rMPLL_CON1
 
 	// ENABLE(1), MDIV(200), PDIV(3), SDIV(0)
-	uBits = (1 << 31) | (200 << 16) | (3 << 8) | (0 << 0);	// MPLL=1600MHz(3:200:0)
+	uBits = (1 << 31) | (MPLL_MDIV << 16) | (MPLL_PDIV << 8) | (MPLL_SDIV << 0);
 	Outp32(0x10014100, uBits);			// rMPLL_CON0
 
 	while ((Inp32(0x10014100) & (1 << 29)) == 0);

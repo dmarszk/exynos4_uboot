@@ -55,9 +55,59 @@
 #define APLL_SDIV	0x0
 #endif
 
+#if defined(MCLK_CDREX_800)
+#define MPLL_MDIV	0xC8
+#define MPLL_PDIV	0x3
+#define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_700)
+#define MPLL_MDIV	0xAF
+#define MPLL_PDIV	0x3
+#define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_667)
+#define MPLL_MDIV	0x263
+#define MPLL_PDIV	0xB
+#define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_600)
+#define MPLL_MDIV	0x96
+#define MPLL_PDIV	0x3
+#define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_533)
+#define MPLL_MDIV	0x215
+#define MPLL_PDIV	0xC
+#define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_500)
+#define MPLL_MDIV	0x7D
+#define MPLL_PDIV	0x3
+#define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_400)
 #define MPLL_MDIV	0x64
 #define MPLL_PDIV	0x3
 #define MPLL_SDIV	0x0
+#elif defined(MCLK_CDREX_333)
+#define MPLL_MDIV	0x185
+#define MPLL_PDIV	0x7
+#define MPLL_SDIV	0x1
+#elif defined(MCLK_CDREX_300)
+#define MPLL_MDIV	0xC8
+#define MPLL_PDIV	0x4
+#define MPLL_SDIV	0x1
+#elif defined(MCLK_CDREX_266)
+#define MPLL_MDIV	0x215
+#define MPLL_PDIV	0xC
+#define MPLL_SDIV	0x1
+#elif defined(MCLK_CDREX_200)
+#define MPLL_MDIV	0x32
+#define MPLL_PDIV	0x3
+#define MPLL_SDIV	0x1
+#elif defined(MCLK_CDREX_166)
+#define MPLL_MDIV	0xDE
+#define MPLL_PDIV	0x4
+#define MPLL_SDIV	0x2
+#elif defined(MCLK_CDREX_100)
+#define MPLL_MDIV	0x64
+#define MPLL_PDIV	0x3
+#define MPLL_SDIV	0x2
+#endif
 
 #define CPLL_MDIV	0xDE
 #define CPLL_PDIV	0x4
