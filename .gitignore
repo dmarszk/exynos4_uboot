@@ -30,6 +30,7 @@
 /u-boot.lds
 /u-boot-onenand.bin
 /u-boot-flexonenand.bin
+/bl2.bin
 
 #
 # Generated files

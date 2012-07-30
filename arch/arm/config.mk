@@ -64,7 +64,7 @@ PLATFORM_LIBS += $(OBJTREE)/arch/arm/lib/eabi_compat.o
 endif
 endif
 #LDSCRIPT := $(SRCTREE)/$(CPUDIR)/u-boot.lds
-LDSCRIPT := $(TOPDIR)/board/samsung/$(BOARD)/u-boot.lds
+LDSCRIPT := $(TOPDIR)/board/$(VENDOR)/$(BOARD)/u-boot.lds
 
 # needed for relocation
 ifndef CONFIG_NAND_SPL
