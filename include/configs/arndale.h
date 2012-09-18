@@ -372,7 +372,8 @@
  * machine type
  */
 
-#define MACH_TYPE       		3825	/* SMDK5250 machine ID */
+/*#define MACH_TYPE       		3825	/* SMDK5250 machine ID */
+#define MACH_TYPE			4274	/* Arndale */
 
 #define CONFIG_ENV_OFFSET		0x0007C000
 
