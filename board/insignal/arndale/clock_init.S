@@ -311,7 +311,7 @@ check_div_syslft_state:
 	orr	r1, r1, r3
 	str	r1, [r0, r2]
 
-	ldr	r1, =0x66666
+	ldr	r1, =CLK_SRC_FSYS_VAL
 	ldr	r2, =CLK_SRC_FSYS_OFFSET
 	str	r1, [r0, r2]
 

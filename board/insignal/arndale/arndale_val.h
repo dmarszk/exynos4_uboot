@@ -407,6 +407,20 @@
 /* BPLL_LOCK	*/
 #define BPLL_LOCK_VAL	(0x546)
 
+#define USBDRD30_SEL	0
+#define SATA_SEL	0
+#define MMC3_SEL	7
+#define MMC2_SEL	7
+#define MMC1_SEL	7
+#define MMC0_SEL	7
+#define CLK_SRC_FSYS_VAL	((USBDRD30_SEL << 28) \
+				|(SATA_SEL << 24) \
+				|(MMC3_SEL << 12) \
+				|(MMC2_SEL << 8) \
+				|(MMC1_SEL << 4) \
+				|(MMC0_SEL))
+
+
 /* CLK_SRC_PERIC0 */
 #define PWM_SEL		0
 #define UART3_SEL	0

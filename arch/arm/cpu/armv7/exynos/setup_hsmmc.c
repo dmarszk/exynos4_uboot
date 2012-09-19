@@ -52,7 +52,20 @@ void set_hsmmc_pre_ratio (struct sdhci_host *host, uint clock)
 	div = CLK_DIV_FSYS1 & ~(0x0000ff00);
 	tmp = CLK_DIV_FSYS1 & (0x0000000f);
 
-	clk = get_MPLL_CLK();
+	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)) & 0xF;
+	switch (i) {
+	default : clk = 0; break;
+	case 0:
+	case 1: clk = CONFIG_SYS_CLK_FREQ; break;
+	case 2: clk = 27000000; break;
+	//case 3: clk = /*SCLK_DPTXPHY*/; break;
+	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
+	//case 5: clk = /*SCLK_HDMIPHY*/; break;
+	case 6: clk = get_MPLL_CLK(); break;
+	case 7: clk = get_BPLL_CLK(); break;
+	case 8: clk = get_VPLL_CLK(); break;
+	//case 9: clk = get_CPLL_CLK(); break;
+	}
 	clk = clk / (tmp + 1);
 	for(i=0 ; i<=0xff; i++)
 	{
@@ -83,7 +96,20 @@ void set_hsmmc_pre_ratio (struct sdhci_host *host, uint clock)
 	div = CLK_DIV_FSYS2 & ~(0x0000ff00);
 	tmp = CLK_DIV_FSYS2 & (0x0000000f);
 
-	clk = get_MPLL_CLK();
+	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)>>8) & 0xF;
+	switch (i) {
+	default : clk = 0; break;
+	case 0:
+	case 1: clk = CONFIG_SYS_CLK_FREQ; break;
+	case 2: clk = 27000000; break;
+	//case 3: clk = /*SCLK_DPTXPHY*/; break;
+	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
+	//case 5: clk = /*SCLK_HDMIPHY*/; break;
+	case 6: clk = get_MPLL_CLK(); break;
+	case 7: clk = get_BPLL_CLK(); break;
+	case 8: clk = get_VPLL_CLK(); break;
+	//case 9: clk = get_CPLL_CLK(); break;
+	}
 	clk = clk / (tmp + 1);
 	for(i=0 ; i<=0xff; i++)
 	{
@@ -102,14 +128,25 @@ void setup_hsmmc_clock(void)
 	u32 i;
 
 #ifdef USE_MMC0
-	/* MMC0 clock src = SCLKMPLL */
-	tmp = CLK_SRC_FSYS & ~(0x0000000f);
-	CLK_SRC_FSYS = tmp | 0x00000006;
+	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)) & 0xF;
 
 	/* MMC0 clock div */
 	tmp = CLK_DIV_FSYS1 & ~(0x0000ff0f);
 #ifndef CONFIG_CPU_EXYNOS5250_EVT1
-	clock = get_MPLL_CLK()/1000000;
+	switch (i) {
+	default : clock = 0; break;
+	case 0:
+	case 1: clock = CONFIG_SYS_CLK_FREQ; break;
+	case 2: clock = 27000000; break;
+	//case 3: clk = /*SCLK_DPTXPHY*/; break;
+	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
+	//case 5: clk = /*SCLK_HDMIPHY*/; break;
+	case 6: clock = get_MPLL_CLK(); break;
+	case 7: clock = get_BPLL_CLK(); break;
+	case 8: clock = get_VPLL_CLK(); break;
+	//case 9: clk = get_CPLL_CLK(); break;
+	}
+	clock = clock / 1000000;
 	for(i=0; i<= 0xf; i++)
 	{
 		if((clock / (i+1)) <= 400) {
@@ -133,14 +170,25 @@ void setup_hsmmc_clock(void)
 #endif	
 
 #ifdef USE_MMC2
-	/* MMC2 clock src = SCLKMPLL */
-	tmp = CLK_SRC_FSYS & ~(0x00000f00);
-	CLK_SRC_FSYS = tmp | 0x00000600;
+	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)>>8) & 0xF;
 
 	/* MMC2 clock div */
 	tmp = CLK_DIV_FSYS2 & ~(0x0000ff0f);
 #if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	clock = get_MPLL_CLK()/1000000;
+	switch (i) {
+	default : clock = 0; break;
+	case 0:
+	case 1: clock = CONFIG_SYS_CLK_FREQ; break;
+	case 2: clock = 27000000; break;
+	//case 3: clk = /*SCLK_DPTXPHY*/; break;
+	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
+	//case 5: clk = /*SCLK_HDMIPHY*/; break;
+	case 6: clock = get_MPLL_CLK(); break;
+	case 7: clock = get_BPLL_CLK(); break;
+	case 8: clock = get_VPLL_CLK(); break;
+	//case 9: clk = get_CPLL_CLK(); break;
+	}
+	clock = clock / 1000000;
 	for(i=0; i<= 0xf; i++)
 	{
 		if((clock / (i+1)) <= 400) {
@@ -203,11 +251,11 @@ void setup_hsmmc_cfg_gpio(void)
 #if defined(CONFIG_CPU_EXYNOS5250_EVT1)
 	writel(0x02222222, GPIO_CON_MMC0_1);
 	writel(0x00003FF0, GPIO_CON_MMC0_1 + GPIO_PUD_OFFSET);
-	writel(0x00002AAA, GPIO_CON_MMC0_1 + GPIO_DRV_OFFSET);
+	writel(0x00003FFF, GPIO_CON_MMC0_1 + GPIO_DRV_OFFSET);
 
 	writel(0x00002222, GPIO_CON_MMC0_2);
 	writel(0x000000FF, GPIO_CON_MMC0_2 + GPIO_PUD_OFFSET);
-	writel(0x000000AA, GPIO_CON_MMC0_2 + GPIO_DRV_OFFSET);
+	writel(0x000000FF, GPIO_CON_MMC0_2 + GPIO_DRV_OFFSET);
 #else
 	writel(0x02222222, GPIO_CON_MMC0_1);
 	writel(0x00003FF0, GPIO_CON_MMC0_1 + GPIO_PUD_OFFSET);

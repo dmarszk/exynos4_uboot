@@ -137,6 +137,7 @@ void load_uboot_image(u32 boot_device)
 	info_image->secure_context_base = SMC_SECURE_CONTEXT_BASE;
 	info_image->signature_size = SMC_SIGNATURE_SIZE;
 
+	dmc_delay(10000);
 	exynos_smc(SMC_CMD_LOAD_UBOOT, boot_device, CONFIG_IMAGE_INFO_BASE, 0);
 }
 
