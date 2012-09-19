@@ -68,11 +68,11 @@
 /* APLL : 800MHz */
 //#define CONFIG_CLK_ARM_800_APLL_800
 /* APLL : 1GHz */
-#define CONFIG_CLK_ARM_1000_APLL_1000
+//#define CONFIG_CLK_ARM_1000_APLL_1000
 /* APLL : 1.2GHz */
 //#define CONFIG_CLK_ARM_1200_APLL_1200
 /* APLL : 1.4GHz */
-//#define CONFIG_CLK_ARM_1400_APLL_1400
+#define CONFIG_CLK_ARM_1400_APLL_1400
 
 /* LPDDR support */
 #define CONFIG_DDR3
@@ -81,7 +81,7 @@
 
 /* MCLK_CDREX */
 #if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-#define MCLK_CDREX_667  	1
+#define MCLK_CDREX_800  	1
 #else
 #ifdef CONFIG_DDR3
 #define MCLK_CDREX_800  	1
