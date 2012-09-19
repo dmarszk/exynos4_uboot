@@ -68,7 +68,12 @@ int print_cpuinfo(void)
 	}
 #endif
 
-	printf("APLL = %ldMHz, MPLL = %ldMHz\n", get_APLL_CLK()/1000000, get_MPLL_CLK()/1000000);
+	printf("APLL = %ldMHz, MPLL = %ldMHz, EPLL = %ldMHz, VPLL = %ldMHz, BPLL = %ldMHz\n", 
+		get_APLL_CLK()/1000000,
+		get_MPLL_CLK()/1000000,
+		get_EPLL_CLK()/1000000,
+		get_VPLL_CLK()/1000000,
+		get_BPLL_CLK()/1000000);
 
 	return 0;
 }

@@ -28,6 +28,7 @@
 #define EPLL	2
 #define HPLL	3
 #define VPLL	4
+#define BPLL	5
 
 void s5p_clock_init(void);
 
