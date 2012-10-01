@@ -19,9 +19,9 @@
 #define		_100MB				(100*1024*1024)
 #define		_8_4GB				(1023*254*63)
 	
-#define		SYSTEM_PART_SIZE		(300*1024*1024)
-#define		USER_DATA_PART_SIZE		(300*1024*1024)
-#define		CACHE_PART_SIZE			(300*1024*1024)
+#define		SYSTEM_PART_SIZE		(520*1024*1024)
+#define		USER_DATA_PART_SIZE		(520*1024*1024)
+#define		CACHE_PART_SIZE			(520*1024*1024)
 
 #define		CHS_MODE			0
 #define		LBA_MODE			!(CHS_MODE)
