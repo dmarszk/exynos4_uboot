@@ -200,8 +200,24 @@ int checkboard(void)
 
 int board_late_init(void)
 {
-	if (second_boot_info == 1)
+#ifdef CONFIG_BOOTCMD_NORMAL
+	setenv("bootcmd_normal", CONFIG_BOOTCMD_NORMAL);
+#endif
+#ifdef CONFIG_BOOTCMD_EXTEND
+	setenv("bootcmd_extend", CONFIG_BOOTCMD_EXTEND);
+#endif
+
+	if (second_boot_info == 1) {
 		printf("###Secondary Boot###\n");
+		run_command(CONFIG_BOOTCOMMAND_ERASE, NULL);
+		run_command(CONFIG_BOOTCOMMAND_FUSE_BOOT, NULL);
+		//run_command(CONFIG_BOOTCOMMAND_PARTITION, NULL);
+	}
+
+	int *GPX1DAT = 0x11400C24;
+	if (*GPX1DAT == 0x62) {
+		setenv("bootcmd", CONFIG_BOOTCMD_EXTEND);
+	}
 
 	if(INF_REG4_REG == CONFIG_FACTORY_RESET_MODE)
 		setenv ("bootcmd", CONFIG_FACTORY_RESET_BOOTCOMMAND);
