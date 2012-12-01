@@ -162,9 +162,9 @@ struct fastboot_ptentry
 	/* The logical name for this partition, null terminated */
 	char name[16];
 	/* The start wrt the nand part, must be multiple of nand block size */
-	unsigned long long start;
+	unsigned int start;
 	/* The length of the partition, must be multiple of nand block size */
-	unsigned long long length;
+	unsigned int length;
 	/* Controls the details of how operations are done on the partition
 	   See the FASTBOOT_PTENTRY_FLAGS_*'s defined below */
 	unsigned int flags;

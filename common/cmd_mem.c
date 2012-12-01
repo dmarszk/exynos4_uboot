@@ -1167,7 +1167,6 @@ int do_md5sum(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	unsigned long addr, len;
 	unsigned int i;
 	u8 output[16];
-	char str[33];
 
 	if (argc < 3)
 		return cmd_usage(cmdtp);
@@ -1177,12 +1176,8 @@ int do_md5sum(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	md5((unsigned char *) addr, len, output);
 	printf("md5 for %08lx ... %08lx ==> ", addr, addr + len - 1);
-	for (i = 0; i < 16; i++) {
-		sprintf(&str[i*2], "%02x", output[i]);
+	for (i = 0; i < 16; i++)
 		printf("%02x", output[i]);
-	}
-	str[32] = 0;
-	setenv("md5checksum", str);
 	printf("\n");
 
 	return 0;

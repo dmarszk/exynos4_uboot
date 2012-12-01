@@ -67,8 +67,11 @@ static void smc9115_pre_init(void)
 		     (0x1 << 28) );
 }
 
+#define	PS_HOLD		*(volatile unsigned long *)(0x1002330C)
 int board_init(void)
 {
+	PS_HOLD = 0x5300;
+
         #ifdef CONFIG_SMC911X
    	        smc9115_pre_init();
         #endif
@@ -192,13 +195,17 @@ int checkboard(void)
 int board_late_init (void)
 {
 	GPIO_Init();
-	GPIO_SetFunctionEach(eGPIO_X0, eGPIO_0, 0);
-	GPIO_SetPullUpDownEach(eGPIO_X0, eGPIO_0, 0);
 
-	udelay(10);
-	if (GPIO_GetDataEach(eGPIO_X0, eGPIO_0) == 0 || second_boot_info == 1){
-		setenv ("bootcmd", CONFIG_BOOTCOMMAND2);
-	}
+	GPIO_SetFunctionEach(eGPIO_C1, eGPIO_3, eGPO);
+	GPIO_SetDataEach(eGPIO_C1, eGPIO_3, 1);
+
+	GPIO_SetFunctionEach(eGPIO_K1, eGPIO_6, eGPO);
+	GPIO_SetDataEach(eGPIO_K1, eGPIO_6, 1);
+
+	GPIO_SetFunctionEach(eGPIO_X3, eGPIO_3, eGPO);
+	GPIO_SetPullUpDownEach(eGPIO_X3, eGPIO_3, 0);
+	GPIO_SetDataEach(eGPIO_X3, eGPIO_3, 1);
+
 	return 0;
 }
 

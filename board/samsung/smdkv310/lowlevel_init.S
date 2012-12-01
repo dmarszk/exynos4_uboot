@@ -39,6 +39,12 @@ lowlevel_init:
 	cmp	r1, r2
 	beq	wakeup_reset
 
+	/* PS_HOLD pin set to high */
+	ldr	r0, =0x1002330C
+	ldr	r1, [r0]
+	orr	r1, r1, #0x5300	
+	str	r1, [r0]
+
 	/* During sleep/wakeup or AFTR mode, pmic_init function is not available 
 	 * and it causes delays. So except for sleep/wakeup and AFTR mode, 
 	 * the below function is needed 

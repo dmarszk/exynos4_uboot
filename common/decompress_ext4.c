@@ -24,7 +24,7 @@
 static int write_raw_chunk(char* data, unsigned int sector, unsigned int sector_size);
 
 
-int check_compress_ext4(char *img_base, unsigned long long parti_size) {
+int check_compress_ext4(char *img_base, unsigned int parti_size) {
 	ext4_file_header *file_header;
 
 	file_header = (ext4_file_header*)img_base;
@@ -57,7 +57,7 @@ int check_compress_ext4(char *img_base, unsigned long long parti_size) {
 
 	if ((parti_size/file_header->block_size)  < file_header->total_blocks) {
 		printf("Invalid Volume Size! Image is bigger than partition size!\n");
-		printf("partion size %lld , image size %d \n",
+		printf("partion size %d , image size %d \n",
 			(parti_size/file_header->block_size), file_header->total_blocks);
 		while(1);
 	}

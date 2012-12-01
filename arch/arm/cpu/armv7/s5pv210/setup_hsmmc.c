@@ -171,7 +171,6 @@ void setup_sdhci0_cfg_card(struct sdhci_host *host)
 		ctrl3 |= (1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
 	} else if (37000000 <= host->clock && host->clock <= 52000000) {
 		ctrl3 &= ~(1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
-		ctrl3 |= (1 << 31 | 1 << 23 | 0 << 15 | 0 << 7);
 	} else {
 		printf("This CLOCK is Not Support: %d\n", host->clock);
 	}

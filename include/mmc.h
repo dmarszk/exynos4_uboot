@@ -129,6 +129,7 @@
 #define EXT_CSD_BUS_WIDTH	183	/* R/W */
 #define EXT_CSD_HS_TIMING	185	/* R/W */
 #define EXT_CSD_CARD_TYPE	196	/* RO */
+#define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
 #define EXT_CSD_REV		192	/* RO */
 #define EXT_CSD_SEC_CNT		212	/* RO, 4 bytes */
 #define BOOT_SIZE_MULTI		226	/* RO */
@@ -152,6 +153,9 @@
 #define EXT_CSD_BUS_WIDTH_8	2	/* Card is in 8 bit mode */
 #define EXT_CSD_BUS_WIDTH_4_DDR	5	/* Card is in 4 bit DDR mode */
 #define EXT_CSD_BUS_WIDTH_8_DDR	6	/* Card is in 8 bit DDR mode */
+
+#define EXT_CSD_RST_N_EN_MASK	0x3
+#define EXT_CSD_RST_N_ENABLED	0x1	/* RST_n is enabled on card */
 
 /* Controller */
 #define MMC_BUS_WIDTH_1		   0

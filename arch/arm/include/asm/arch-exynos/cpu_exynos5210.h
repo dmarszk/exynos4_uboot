@@ -67,11 +67,6 @@
 #define CHIP_ID_BASE		        EXYNOS5210_PRO_ID
 #define PRO_ID_OFFSET	0x0
 #define PRO_ID		__REG(CHIP_ID_BASE+PRO_ID_OFFSET)
-#define PRO_MAINREV		((PRO_ID >> 0x4) & 0x0f)
-#define PRO_SUBREV		(PRO_ID & 0x0f)
-#define PRO_PKGINFO             ((PRO_ID >> 0x8) & 0x0f)
-#define SCP_TYPE                0x0
-#define POP_TYPE                0x2
 
 /*
  * SYSREG
@@ -580,12 +575,6 @@
 #define BIT_ALLMSK			(0xFFFFFFFF)
 
 #define PWMTIMER_BASE                   EXYNOS5210_PWMTIMER_BASE
-
-/*
- * USBD 2.0 SFR
- */
-#define USBOTG_LINK_BASE		(0x0)
-#define USBOTG_PHY_BASE			(0x0)
 
 /*
  * USBD3 SFR

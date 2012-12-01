@@ -303,6 +303,7 @@ static void s3c_hsmmc_set_ios(struct mmc *mmc)
 	if (mmc->bus_width == MMC_BUS_WIDTH_4) {
 		dbg("MMC_MODE_4BIT\n");
 		ctrl |= SDHCI_CTRL_4BITBUS;
+
 	} else if (mmc->bus_width == MMC_BUS_WIDTH_8) {
 		dbg("MMC_MODE_8BIT\n");
 		ctrl |= SDHCI_CTRL_8BITBUS;
@@ -310,7 +311,16 @@ static void s3c_hsmmc_set_ios(struct mmc *mmc)
 		ctrl &= ~(SDHCI_CTRL_4BITBUS | SDHCI_CTRL_8BITBUS);
 	}
 
-	ctrl &= ~SDHCI_CTRL_HISPD;
+	/* Set Controller High Speed */
+	if (0 < mmc->clock && mmc->clock < 25000000)
+		ctrl &= ~SDHCI_CTRL_HISPD;
+	else if (25000000 <= mmc->clock && mmc->clock <= 52000000) {
+		if (IS_SD(mmc)) 
+			ctrl |= SDHCI_CTRL_HISPD;
+		else
+			ctrl &= ~(SDHCI_CTRL_HISPD);
+	} else
+		dbg("Not support CLK\n");
 
 	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
 }
@@ -384,16 +394,16 @@ static int s3c_hsmmc_initialize(int channel)
 	mmc->init = s3c_hsmmc_init;
 
 	mmc->voltages = MMC_VDD_32_33 | MMC_VDD_33_34;
+#ifdef CONFIG_CPU_EXYNOS5250
+	mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT;
+#else
 	mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT |
 			MMC_MODE_HS_52MHz | MMC_MODE_HS;
+#endif
 
 	mmc->f_min = 400000;
 #ifdef CONFIG_EXYNOS4212
-	#ifdef CONFIG_EXYNOS4412_EVT1
-	mmc->f_max = 50000000;
-	#else
 	mmc->f_max = 45000000;
-	#endif
 #else
 	mmc->f_max = 52000000;
 #endif

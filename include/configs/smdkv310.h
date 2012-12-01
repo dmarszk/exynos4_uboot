@@ -40,10 +40,12 @@
 #define CONFIG_EVT1		1	/* EVT1 */
 //#define NAND_BOOTING		1
 
+#define CONFIG_HKDKC210         1
+
 //#define CONFIG_TRUSTZONE
 #define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
 
-#define CONFIG_SECURE_BL1_ONLY
+//#define CONFIG_SECURE_BL1_ONLY
 //#define CONFIG_SECURE_BOOT
 #ifdef CONFIG_SECURE_BOOT
 #define CONFIG_S5PC210S
@@ -59,13 +61,13 @@
 /* APLL : 800Mhz, DMC bus clock: 330Mhz	*/
 //#define CONFIG_CLK_800_330_165
 /* APLL : 800Mhz, DMC bus clock: 400Mhz */
-#define CONFIG_CLK_800_400_200
+//#define CONFIG_CLK_800_400_200
 /* APLL : 1GHz, DMC bus clock: 200Mhz - bus:DMC = 1:1 */
 //#define CONFIG_CLK_1000_200_200
 /* APLL : 1GHz, DMC bus clock: 330Mhz */
 //#define CONFIG_CLK_1000_330_165
 /* APLL : 1GHz, DMC bus clock: 400Mhz */
-//#define CONFIG_CLK_1000_400_200
+#define CONFIG_CLK_1000_400_200
 
 /* Notice for MSHC[Using of MMC CH4] */
 /*
@@ -143,13 +145,11 @@
 #undef CONFIG_CMD_FLASH
 #undef CONFIG_CMD_IMLS
 #ifndef CONFIG_TRUSTZONE
-#define CONFIG_CMD_NAND
+//#define CONFIG_CMD_NAND
 #endif
 
 #define CONFIG_CMD_CACHE
 #define CONFIG_CMD_REGINFO
-#define CONFIG_CMD_ONENAND
-#define CONFIG_ONENAND
 #define CONFIG_CMD_MMC
 #define CONFIG_CMD_MOVI
 #define CONFIG_CMD_ELF
@@ -171,7 +171,7 @@
 #define MMC_MAX_CHANNEL		5
 
 #define USE_MMC2
-#define USE_MMC4
+//#define USE_MMC4
 
 /*
  * BOOTP options
@@ -187,9 +187,9 @@
 #define CONFIG_SERVERIP		192.168.0.10
 #define CONFIG_GATEWAYIP	192.168.0.1
 
-#define CONFIG_BOOTDELAY	3
+#define CONFIG_BOOTDELAY	1
 /* Default boot commands for Android booting. */
-#define CONFIG_BOOTCOMMAND	"movi read kernel 0 40008000;movi read rootfs 0 40A00000 100000;bootm 40008000 40A00000"
+#define CONFIG_BOOTCOMMAND	"movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000"
 #define CONFIG_BOOTARGS	""
 
 #define CONFIG_BOOTCOMMAND2	\
@@ -215,7 +215,12 @@
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
 #define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser	*/
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
+
+#ifdef CONFIG_HKDKC210
+#define CONFIG_SYS_PROMPT		"EXYNOS4 # "
+#else
 #define CONFIG_SYS_PROMPT		"SMDKV310 # "
+#endif
 #define CONFIG_SYS_CBSIZE	256	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE	384	/* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS	16	/* max number of command args */
@@ -271,8 +276,12 @@
 #define CONFIG_SYS_NO_FLASH		1
 
 #define CONFIG_SYS_MONITOR_LEN		(256 << 10)	/* 256 KiB */
-#define CONFIG_IDENT_STRING		" for SMDKV310"
 
+#ifdef CONFIG_HKDKC210
+#define CONFIG_IDENT_STRING		" for EXYNOS4210"
+#else
+#define CONFIG_IDENT_STRING		" for SMDKV310"
+#endif
 #define CONFIG_ENABLE_MMU
 
 #ifdef CONFIG_ENABLE_MMU
@@ -397,7 +406,6 @@
 #define CONFIG_BOOT_ONENAND_IROM
 #define CONFIG_NAND
 #define CONFIG_BOOT_NAND
-#define CONFIG_ONENAND
 
 #define CFG_PHY_UBOOT_BASE	MEMORY_BASE_ADDRESS + 0x3e00000
 #define CFG_PHY_KERNEL_BASE	MEMORY_BASE_ADDRESS + 0x8000

@@ -54,6 +54,7 @@ static void feedback_delay(struct mmc *mmc, int count);
 
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
+static int once = 1;
 
 int __board_mmc_getcd(u8 *cd, struct mmc *mmc) {
 	return -1;
@@ -129,16 +130,15 @@ mmc_bwrite(int dev_num, ulong start, lbaint_t blkcnt, const void*src)
 
 	data.src = src;
 	data.blocks = blkcnt;
-	data.blocksize = (1<<9);
+	data.blocksize = blklen;
 	data.flags = MMC_DATA_WRITE;
 
 	err = mmc_send_cmd(mmc, &cmd, &data);
 
 	if (err) {
-
-if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
-		for(; count<9;) {
-			printf("\ncount: %d\n", count);
+if (strcmp(mmc->name, "S5P_MSHC4") != 0) {
+		for(; count<4;) {
+			printf("count: %d\n", count);
 			feedback_delay(mmc, count);
 			count++;
 
@@ -147,7 +147,7 @@ if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
 			while (readb(mmc->ioaddr + SDHCI_SOFTWARE_RESET) & (1<<1)) {
 				if (timeout_c == 0) {
 					printf("CMD Reset is NEVER released\n");
-					return 0;
+					return;
 				}
 				timeout_c--;
 				udelay(1000);
@@ -158,7 +158,7 @@ if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
 			while (readb(mmc->ioaddr + SDHCI_SOFTWARE_RESET) & (1<<2)) {
 				if (timeout_d == 0) {
 					printf("DATA Reset is NEVER released\n");
-					return 0;
+					return;
 				}
 				timeout_d--;
 				udelay(1000);
@@ -173,7 +173,7 @@ if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
 				break;
 		}
 
-		if (count >= 9) {
+		if (count >= 4) {
 			printf("\n\nmmc write failed ERROR: %d\n\r", err);
 			printf("data.dest: 0x%08x\n", data.dest);
 			printf("data.blocks: %d\n", data.blocks);
@@ -207,7 +207,7 @@ int mmc_read_block(struct mmc *mmc, void *dst, uint blocknum)
 
 	data.dest = dst;
 	data.blocks = 1;
-	data.blocksize = (1<<9);
+	data.blocksize = mmc->read_bl_len;
 	data.flags = MMC_DATA_READ;
 
 	return mmc_send_cmd(mmc, &cmd, &data);
@@ -287,15 +287,14 @@ static ulong mmc_bread(int dev_num, ulong start, lbaint_t blkcnt, void *dst)
 
 	data.dest = dst;
 	data.blocks = blkcnt;
-	data.blocksize = (1<<9);
+	data.blocksize = mmc->read_bl_len;
 	data.flags = MMC_DATA_READ;
 
 	err = mmc_send_cmd(mmc, &cmd, &data);
 	if (err) {
-
-if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
-		for(; count<9;) {
-			printf("\ncount: %d\n", count);
+if (strcmp(mmc->name, "S5P_MSHC4") != 0) {
+		for(; count<4;) {
+			printf("count: %d\n", count);
 			feedback_delay(mmc, count);
 			count++;
 
@@ -303,7 +302,7 @@ if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
 			while (readb(mmc->ioaddr + SDHCI_SOFTWARE_RESET) & (1<<1)) {
 				if (timeout_c == 0) {
 					printf("CMD Reset is NEVER released\n");
-					return 0;
+					return;
 				}
 				timeout_c--;
 				udelay(1000);
@@ -313,7 +312,7 @@ if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
 			while (readb(mmc->ioaddr + SDHCI_SOFTWARE_RESET) & (1<<2)) {
 				if (timeout_d == 0) {
 					printf("DATA Reset is NEVER released\n");
-					return 0;
+					return;
 				}
 				timeout_d--;
 				udelay(1000);
@@ -326,7 +325,7 @@ if (strncmp(mmc->name, "S5P_MSHC", 8) != 0) {
 				break;
 		}
 
-		if (count >= 9) {
+		if (count >= 4) {
 			printf("mmc read failed ERROR: %d\n\r", err);
 			printf("data.dest: 0x%08x\n", data.dest);
 			printf("data.blocks: %d\n", data.blocks);
@@ -462,7 +461,7 @@ int mmc_send_op_cond(struct mmc *mmc)
 	mmc->ocr = cmd.response[0];
 
 	mmc->high_capacity = ((mmc->ocr & OCR_HCS) == OCR_HCS);
-	mmc->rca = 0x0001;
+	mmc->rca = 0;
 
 	return 0;
 }
@@ -529,7 +528,7 @@ int mmc_change_freq(struct mmc *mmc)
 	cardtype = ext_csd[196] & 0xf;
 
 	dbg("cardtype: 0x%08x\n", cardtype);
-	
+
 	/* High Speed is set, there are three types: DDR 52Mhz,
 	 * 52MHz and 26MHz
 	 */
@@ -559,9 +558,38 @@ int mmc_change_freq(struct mmc *mmc)
 	if (err)
 		return err;
 
+	if (strcmp(mmc->name, "S5P_MSHC4") == 0) {
+		if(once) {
+			char man_ID= (mmc->cid[0] >> 24);
+			unsigned long size = (mmc->capacity/(1024*1024/mmc->read_bl_len));
+
+			if(man_ID == 0x15) { //samsung
+				printf("Manufacturer SAMSUNG [ %dMB ]\n",size);
+			}
+			else if(man_ID == 0x90) {
+				printf("Manufacturer HYNIX [ %dMB ] \n", size);
+				if(size < 16000) {
+					err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_RST_N_FUNCTION, EXT_CSD_RST_N_ENABLED);
+					if (err) {
+						printf("\n%s[%d] : EXT_CSD_RST_N_FUNCTION Set error....... \n\n",__func__,__LINE__);
+						return err;
+					}
+				}
+			}
+			else if(man_ID == 0x11) {
+				printf("Manufacturer TOSHIBA [ %dMB ]\n",size);
+				err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_RST_N_FUNCTION, EXT_CSD_RST_N_ENABLED);
+				if(err) {
+					printf("\n%s[%d] : EXT_CSD_RST_N_FUNCTION Set error....... \n\n",__func__,__LINE__);
+					return err;
+				}
+			}
+			once = 0;
+		}
+	}
+
 	return 0;
 }
-
 int sd_switch(struct mmc *mmc, int mode, int group, u8 value, u8 *resp)
 {
 	struct mmc_cmd cmd;
@@ -665,6 +693,7 @@ retry_scr:
 
 	if (mmc->scr[0] & SD_DATA_4BIT)
 		mmc->card_caps |= MMC_MODE_4BIT;
+
 	/* If high-speed isn't supported, we return */
 	if (!(__be32_to_cpu(switch_status[3]) & SD_HIGHSPEED_SUPPORTED))
 		return 0;
@@ -673,8 +702,6 @@ retry_scr:
 
 	if (err)
 		return err;
-
-	sd_switch(mmc, SD_SWITCH_CHECK, 0, 1, (u8 *)&switch_status);
 
 	if ((__be32_to_cpu(switch_status[4]) & 0x0f000000) == 0x01000000)
 		mmc->card_caps |= MMC_MODE_HS;
@@ -827,6 +854,62 @@ static int sd_decode_csd(struct mmc *host)
 
 	return 0;
 }
+
+#if 0
+/*
+ * Given the decoded CSD structure, decode the raw CID to our CID structure.
+ */
+static int mmc_decode_cid(struct mmc_card *card)
+{
+	u32 *resp = card->raw_cid;
+
+	/*
+	 * The selection of the format here is based upon published
+	 * specs from sandisk and from what people have reported.
+	 */
+	switch (card->csd.mmca_vsn) {
+	case 0: /* MMC v1.0 - v1.2 */
+	case 1: /* MMC v1.4 */
+		card->cid.manfid	= UNSTUFF_BITS(resp, 104, 24);
+		card->cid.prod_name[0]	= UNSTUFF_BITS(resp, 96, 8);
+		card->cid.prod_name[1]	= UNSTUFF_BITS(resp, 88, 8);
+		card->cid.prod_name[2]	= UNSTUFF_BITS(resp, 80, 8);
+		card->cid.prod_name[3]	= UNSTUFF_BITS(resp, 72, 8);
+		card->cid.prod_name[4]	= UNSTUFF_BITS(resp, 64, 8);
+		card->cid.prod_name[5]	= UNSTUFF_BITS(resp, 56, 8);
+		card->cid.prod_name[6]	= UNSTUFF_BITS(resp, 48, 8);
+		card->cid.hwrev		= UNSTUFF_BITS(resp, 44, 4);
+		card->cid.fwrev		= UNSTUFF_BITS(resp, 40, 4);
+		card->cid.serial	= UNSTUFF_BITS(resp, 16, 24);
+		card->cid.month		= UNSTUFF_BITS(resp, 12, 4);
+		card->cid.year		= UNSTUFF_BITS(resp, 8, 4) + 1997;
+		break;
+
+	case 2: /* MMC v2.0 - v2.2 */
+	case 3: /* MMC v3.1 - v3.3 */
+	case 4: /* MMC v4 */
+		card->cid.manfid	= UNSTUFF_BITS(resp, 120, 8);
+		card->cid.oemid		= UNSTUFF_BITS(resp, 104, 16);
+		card->cid.prod_name[0]	= UNSTUFF_BITS(resp, 96, 8);
+		card->cid.prod_name[1]	= UNSTUFF_BITS(resp, 88, 8);
+		card->cid.prod_name[2]	= UNSTUFF_BITS(resp, 80, 8);
+		card->cid.prod_name[3]	= UNSTUFF_BITS(resp, 72, 8);
+		card->cid.prod_name[4]	= UNSTUFF_BITS(resp, 64, 8);
+		card->cid.prod_name[5]	= UNSTUFF_BITS(resp, 56, 8);
+		card->cid.serial	= UNSTUFF_BITS(resp, 16, 32);
+		card->cid.month		= UNSTUFF_BITS(resp, 12, 4);
+		card->cid.year		= UNSTUFF_BITS(resp, 8, 4) + 1997;
+		break;
+
+	default:
+		printk(KERN_ERR "%s: card has unknown MMCA version %d\n",
+			mmc_hostname(card->host), card->csd.mmca_vsn);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+#endif
 
 /*
  * Given a 128-bit response, decode to our card CSD structure.
@@ -1025,6 +1108,10 @@ int mmc_startup(struct mmc *mmc)
 {
 	int err;
 	struct mmc_cmd cmd;
+#if 0
+	uint mult, freq;
+	u64 cmult, csize;
+#endif
 
 	/* Put the Card in Identify Mode */
 	cmd.cmdidx = MMC_CMD_ALL_SEND_CID;
@@ -1073,6 +1160,72 @@ int mmc_startup(struct mmc *mmc)
 		sd_decode_csd(mmc);
 	else
 		mmc_decode_csd(mmc);
+
+/* Replaced from u-boot-samsung version to u-boot-1.3.4-samsung */
+/* Analyze CSD register value function */
+#if 0 
+	mmc->csd[0] = cmd.response[0];
+	mmc->csd[1] = cmd.response[1];
+	mmc->csd[2] = cmd.response[2];
+	mmc->csd[3] = cmd.response[3];
+
+	if (mmc->version == MMC_VERSION_UNKNOWN) {
+		int version = (cmd.response[0] >> 26) & 0xf;
+
+		switch (version) {
+			case 0:
+				mmc->version = MMC_VERSION_1_2;
+				break;
+			case 1:
+				mmc->version = MMC_VERSION_1_4;
+				break;
+			case 2:
+				mmc->version = MMC_VERSION_2_2;
+				break;
+			case 3:
+				mmc->version = MMC_VERSION_3;
+				break;
+			case 4:
+				mmc->version = MMC_VERSION_4;
+				break;
+			default:
+				mmc->version = MMC_VERSION_1_2;
+				break;
+		}
+	}
+
+	/* divide frequency by 10, since the mults are 10x bigger */
+	freq = fbase[(cmd.response[0] & 0x7)];
+	mult = multipliers[((cmd.response[0] >> 3) & 0xf)];
+
+	mmc->tran_speed = freq * mult;
+
+	mmc->read_bl_len = 1 << ((cmd.response[1] >> 16) & 0xf);
+
+	if (IS_SD(mmc))
+		mmc->write_bl_len = mmc->read_bl_len;
+	else
+		mmc->write_bl_len = 1 << ((cmd.response[3] >> 22) & 0xf);
+
+	if (mmc->high_capacity) {
+		csize = (mmc->csd[1] & 0x3f) << 16
+			| (mmc->csd[2] & 0xffff0000) >> 16;
+		cmult = 8;
+	} else {
+		csize = (mmc->csd[1] & 0x3ff) << 2
+			| (mmc->csd[2] & 0xc0000000) >> 30;
+		cmult = (mmc->csd[2] & 0x00038000) >> 15;
+	}
+
+	mmc->capacity = (csize + 1) << (cmult + 2);
+	mmc->capacity *= mmc->read_bl_len;
+
+	if (mmc->read_bl_len > 512)
+		mmc->read_bl_len = 512;
+
+	if (mmc->write_bl_len > 512)
+		mmc->write_bl_len = 512;
+#endif
 
 	/* Select the card, and put it into Transfer Mode */
 	cmd.cmdidx = MMC_CMD_SELECT_CARD;
@@ -1135,7 +1288,11 @@ int mmc_startup(struct mmc *mmc)
 		if (mmc->card_caps & MMC_MODE_HS)
 			mmc_set_clock(mmc, 50000000);
 		else {
+#if defined(CONFIG_CPU_EXYNOS5250)
+			mmc_set_clock(mmc, 20000000);
+#else
 			mmc_set_clock(mmc, 25000000);
+#endif
 		}
 	} else {
 		if (mmc->card_caps & MMC_MODE_8BIT_DDR) {
@@ -1184,15 +1341,8 @@ int mmc_startup(struct mmc *mmc)
 
 		if (mmc->card_caps & (MMC_MODE_HS | MMC_MODE_HS_52MHz_DDR_12V |
 						MMC_MODE_HS_52MHz_DDR_18_3V)) {
-if (strncmp(mmc->name, "S5P_MSHC", 8) == 0) {
-		printf("NAME: %s\n", mmc->name);
-#ifdef CONFIG_EXYNOS4412_EVT1
-			mmc_set_clock(mmc, 50000000);
-#elif CONFIG_CPU_EXYNOS5250_EVT1
-			mmc_set_clock(mmc, 52000000);
-#else
+if (strcmp(mmc->name, "S5P_MSHC4") == 0) {
 			mmc_set_clock(mmc, 40000000);
-#endif
 } else {
 			mmc_set_clock(mmc, 52000000);
 }
@@ -1524,62 +1674,29 @@ int mmc_erase(struct mmc *mmc, int part, u32 start, u32 block)
 
 void feedback_delay(struct mmc *mmc, int count)
 {
-#if !defined(CONFIG_S5P_MSHC)
-	unsigned int ctrl2, ctrl3;
+	unsigned int ctrl3;
 
-	ctrl2 = readl(mmc->ioaddr + S3C_SDHCI_CONTROL2);
 	ctrl3 = readl(mmc->ioaddr + S3C_SDHCI_CONTROL3);
-	ctrl2 &= ~(S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
 	ctrl3 &= ~(1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
 
 	switch(count)
 	{
 	case 1:
 		/* Tx: Inverter delay / Rx: Inverter delay */
+		dbg("# Tx: Inverter delay / Rx: Inverter delay\n");
 		printf("# Tx: Inverter delay / Rx: Inverter delay\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
 		break;
 	case 2:
 		/* Tx: Basic delay / Rx: Inverter delay */
+		dbg("## Tx: Basic delay / Rx: Inverter delay\n");
 		printf("## Tx: Basic delay / Rx: Inverter delay\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
 		ctrl3 |= (1 << 31 | 1 << 23 | 0 << 15 | 0 << 7);
 		break;
 	case 3:
-		/* Tx: Inverter delay / Rx: Basic delay */
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
-		printf("## Tx: Inverter delay / Rx: Basic delay\n");
-		ctrl3 |= (0 << 31 | 0 << 23 | 1 << 15 | 1 << 7);
-		break;
-	case 4:
 		/* Tx: Basic delay / Rx: Basic delay */
+		dbg("### Tx: Basic delay / Rx: Basic delay\n");
 		printf("### Tx: Basic delay / Rx: Basic delay\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
 		ctrl3 |= (1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
-		break;
-	case 5:
-		/* Tx: Disable / Rx: Basic delay */
-		printf("# Tx: Disable / Rx: Basic delay\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKRX);
-		ctrl3 |= (1 << 15 | 1 << 7);
-		break;
-	case 6:
-		/* Tx: Disable / Rx: Inverter delay */
-		printf("## Tx: Disable / Rx: Inverter delay\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKRX);
-		ctrl3 |= (0 << 15 | 0 << 7);
-		break;
-	case 7:
-		/* Tx: Basic delay / Rx: Disable */
-		printf("### Tx: Basic delay / Rx: Disable\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX);
-		ctrl3 |= (1 << 31 | 1 << 23);
-		break;
-	case 8:
-		/* Tx: Inverter delay / Rx: Disable */
-		printf("### Tx: Inverter delay / Rx: Disable\n");
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX);
-		ctrl3 |= (0 << 31 | 0 << 23);
 		break;
 	default:
 		/* Tx: Inverter delay / Rx: Inverter delay */
@@ -1587,10 +1704,8 @@ void feedback_delay(struct mmc *mmc, int count)
 		printf("Tx: Inverter delay / Rx: Inverter delay\n");
 		break;
 	}
-	writel(ctrl2, mmc->ioaddr + S3C_SDHCI_CONTROL2);
 	writel(ctrl3, mmc->ioaddr + S3C_SDHCI_CONTROL3);
-	udelay(20000);
-#endif
+	udelay(10000);
 }
 
 int emmc_boot_partition_size_change(struct mmc *mmc, u32 bootsize, u32 rpmbsize)

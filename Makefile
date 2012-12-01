@@ -288,9 +288,6 @@ else
 PLATFORM_LIBGCC = -L $(shell dirname `$(CC) $(CFLAGS) -print-libgcc-file-name`) -lgcc
 endif
 PLATFORM_LIBS += $(PLATFORM_LIBGCC)
-ifeq ($(CONFIG_SECURE_BOOT),y)
-PLATFORM_LIBS += -L ./secure_boot/ -lsecureboot_u-boot_v21
-endif
 export PLATFORM_LIBS
 
 # Special flags for CPP when processing the linker script.
@@ -351,10 +348,6 @@ ifeq ($(CONFIG_S5PC210),y)
 		./mkbl2 u-boot.bin bl2.bin 14336
 endif
 
-ifeq ($(CONFIG_CPU_EXYNOS5250),y)
-		./mkbl2 u-boot.bin bl2.bin 14336
-endif
-
 $(obj)u-boot.ldr:	$(obj)u-boot
 		$(CREATE_LDR_ENV)
 		$(LDR) -T $(CONFIG_BFIN_CPU) -c $@ $< $(LDR_FLAGS)
@@ -395,9 +388,6 @@ GEN_UBOOT = \
 			-Map u-boot.map -o u-boot
 $(obj)u-boot:	depend \
 		$(SUBDIRS) $(OBJS) $(LIBBOARD) $(LIBS) $(LDSCRIPT) $(obj)u-boot.lds
-ifeq ($(CONFIG_SECURE_BOOT),y)
-		cp ./secure_boot/libsecureboot_u-boot_v21.txt ./secure_boot/libsecureboot_u-boot_v21.a
-endif
 		$(GEN_UBOOT)
 
 ifeq ($(CONFIG_KALLSYMS),y)

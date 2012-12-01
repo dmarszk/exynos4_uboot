@@ -35,24 +35,18 @@
 #define CONFIG_ARMV7		1	/* This is an ARM V7 CPU core */
 #define CONFIG_SAMSUNG		1	/* in a SAMSUNG core */
 #define CONFIG_S5P		1	/* which is in a S5P Family */
-#define CONFIG_CPU_EXYNOS4X12	1	/* which is in a Exynos4X12 */
 #define CONFIG_S5PC210		1	/* which is in a S5PC100 */
 #define CONFIG_S5PC220		1	/* which is in a S5PC220 */
 #define CONFIG_SMDKC210		1
 #define CONFIG_SMDKC220		1
 #define CONFIG_EXYNOS4212	1
-#define CONFIG_EXYNOS4412_EVT1	1
+#define CONFIG_EVT1		1	/* EVT1 */
+//#define NAND_BOOTING		1
 
-//#define CONFIG_S5M8767A
+#define	CONFIG_HKDK4212		/* Hardkernel defined */
 
 #define CONFIG_TRUSTZONE
 #define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
-#ifdef CONFIG_TRUSTZONE
-#define CONFIG_BL1_MONITOR
-#define CONFIG_BOOTLOADER_MONITOR        1
-#define CONFIG_PHY_IRAM_BASE            (0x02020000)
-#define CONFIG_PHY_IRAM_NS_BASE         (CONFIG_PHY_IRAM_BASE + 0x2F000)
-#endif
 
 #define CONFIG_SECURE_BL1_ONLY
 //#define CONFIG_SECURE_BOOT
@@ -64,8 +58,6 @@
 #define CONFIG_SECURE_ROOTFS_BASE	0xc1000000
 #define CONFIG_SECURE_ROOTFS_SIZE	0x5c2000
 #endif
-
-//#define CONFIG_UPDATE_SOLUTION	1
 
 //#include <asm/arch/cpu.h>		/* get chip and board defs */
 
@@ -90,11 +82,11 @@
 #define CONFIG_CLK_BUS_DMC_200_400
 
 /* IV_SIZE: 128 byte, 2 port(1 Gbyte), open page, ttrd: 4 */
-#define CONFIG_EVT0_PERFORMANCE
+//#define CONFIG_EVT0_PERFORMANCE
 /* IV_SIZE: 512 Mbyte, 1 port(512 Mbyte), open page, ttrd: 4 */
 //#define CONFIG_EVT0_STABLE
 /* IV_SIZE: 128 byte, 2 port(1 Gbyte), close page, ttrd: 0xA */
-//#define CONFIG_EVT0_RECOMMEND
+#define CONFIG_EVT0_RECOMMEND
 
 
 /* (Memory Interleaving Size = 1 << IV_SIZE) */
@@ -152,7 +144,6 @@
 #define CONFIG_USB_OHCI
 #undef CONFIG_USB_STORAGE
 #define CONFIG_S3C_USBD
-#undef CONFIG_USB_CPUMODE
 
 #define USBD_DOWN_ADDR		0xc0000000
 
@@ -238,16 +229,18 @@
 		"fastboot flash cache 48000000;"					\
 		"reset"
 
-#define CONFIG_BOOTCOMMAND3	"ext3format mmc 0:3;ext3format mmc 0:4;"		\
-				"movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000"
-
 /*
  * Miscellaneous configurable options
  */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
 #define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser	*/
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
-#define CONFIG_SYS_PROMPT		"SMDK4212 # "
+
+#if defined(CONFIG_HKDK4212)
+	#define CONFIG_SYS_PROMPT		"HKDK4212 # "
+#else
+	#define CONFIG_SYS_PROMPT		"SMDK4212 # "
+#endif
 #define CONFIG_SYS_CBSIZE	256	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE	384	/* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS	16	/* max number of command args */
@@ -300,7 +293,12 @@
 #define CONFIG_SYS_NO_FLASH		1
 
 #define CONFIG_SYS_MONITOR_LEN		(256 << 10)	/* 256 KiB */
-#define CONFIG_IDENT_STRING		" for SMDK4212"
+
+#if defined(CONFIG_HKDK4212)
+	#define CONFIG_IDENT_STRING		" for HKDK4212"
+#else
+	#define CONFIG_IDENT_STRING		" for SMDK4212"
+#endif
 
 #define CONFIG_ENABLE_MMU
 
@@ -362,13 +360,6 @@
 #define BOOT_SEC_DEV		0x5
 #define BOOT_EMMC		0x6
 #define BOOT_EMMC_4_4		0x7
-
-/* Boot device */
-#define SDMMC_CH2		0x0
-#define SDMMC_CH0		0x4
-#define EMMC			0x10
-#define EMMC_4_4		0x14
-#define USB			0x40
 
 /* nand copy size from nand to DRAM.*/
 #define	COPY_BL2_SIZE		0x80000

@@ -486,6 +486,7 @@ void env_relocate_spec_movinand(void)
 #if !defined(ENV_IS_EMBEDDED)
 	uint *magic = (uint*)(PHYS_SDRAM_1);
 
+	mmc_init(find_mmc_device(0));
 	movi_read_env(virt_to_phys((ulong)env_ptr));
 	
 	if (crc32(0, env_ptr->data, ENV_SIZE) != env_ptr->crc)

@@ -108,7 +108,5 @@ int init_raw_area_table(block_dev_desc_t * dev_desc, int location)
 		raw_area_control.image[i].start_blk = 0;
 		raw_area_control.image[i].used_blk = 0;
 	}
-
-	return 0;
 }
 

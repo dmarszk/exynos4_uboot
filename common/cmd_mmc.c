@@ -226,9 +226,6 @@ int do_mmcops(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 			struct mmc *mmc = find_mmc_device(dev);
 
-			if (!mmc)
-				return 1;
-
 			u32 count = 0;
 
 			/* Select erase partition */
@@ -257,6 +254,9 @@ int do_mmcops(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 				block = (count - start) - 1;
 				printf("Erase all from %d block\n", start);
 			}
+
+			if (!mmc)
+				rc = 1;
 
 			rc = mmc_erase(mmc, part, start, block);
 

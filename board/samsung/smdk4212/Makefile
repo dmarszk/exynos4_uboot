@@ -31,8 +31,6 @@ include $(TOPDIR)/config.mk
 LIB	= $(obj)lib$(BOARD).o
 
 COBJS-y	:= smdk4212.o
-COBJS-y	+= pmic.o
-COBJS-y	+= smc.o
 SOBJS	:= lowlevel_init.o
 SOBJS	+= mem_init_smdk4212.o
 SOBJS	+= clock_init_smdk4212.o

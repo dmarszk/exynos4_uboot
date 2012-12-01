@@ -64,12 +64,9 @@ fastboot_ptentry ptable_default[] =
 unsigned int ptable_default_size = sizeof(ptable_default);
 
 #define FBOOT_USBD_IS_CONNECTED() (readl(S5P_OTG_GOTGCTL)&(B_SESSION_VALID|A_SESSION_VALID))
-#define FBOOT_USBD_DETECT_IRQ_CPUMODE() (readl(S5P_OTG_GINTSTS) & \
+#define FBOOT_USBD_DETECT_IRQ() (readl(S5P_OTG_GINTSTS) & \
 					(GINTSTS_WkUpInt|GINTSTS_OEPInt|GINTSTS_IEPInt| \
 					 GINTSTS_EnumDone|GINTSTS_USBRst|GINTSTS_USBSusp|GINTSTS_RXFLvl))
-#define FBOOT_USBD_DETECT_IRQ_DMAMODE() (readl(S5P_OTG_GINTSTS) & \
-					(GINTSTS_WkUpInt|GINTSTS_OEPInt|GINTSTS_IEPInt| \
-					 GINTSTS_EnumDone|GINTSTS_USBRst|GINTSTS_USBSusp))
 #define FBOOT_USBD_CLEAR_IRQ()  do { \
 					writel(BIT_ALLMSK, (S5P_OTG_GINTSTS)); \
 				} while (0)
@@ -93,10 +90,10 @@ unsigned int ptable_default_size = sizeof(ptable_default);
 #define DEVICE_STRING_SERIAL_NUMBER_INDEX 3
 #define DEVICE_STRING_CONFIG_INDEX        4
 #define DEVICE_STRING_INTERFACE_INDEX     5
-#define DEVICE_STRING_MAX_INDEX           DEVICE_STRING_INTERFACE_INDEX
+#define DEVICE_STRING_MAX_INDEX           DEVICE_STRING_MANUFACTURER_INDEX
 #define DEVICE_STRING_LANGUAGE_ID         0x0409 /* English (United States) */
 
-static char *device_strings[DEVICE_STRING_MAX_INDEX+1];
+static char *device_strings[DEVICE_STRING_MANUFACTURER_INDEX+1];
 static struct cmd_fastboot_interface *fastboot_interface = NULL;
 /* The packet size is dependend of the speed mode
    In high speed mode packets are 512
@@ -164,7 +161,6 @@ int fboot_usbctl_init(void)
 {
 	s3c_usbctl_init();
 	is_fastboot = 1;
-	return 0;
 }
 
 void fboot_usb_int_bulkin(void)
@@ -175,16 +171,12 @@ void fboot_usb_int_bulkin(void)
 
 	if ((fboot_response_flag==1)&&(reply_msg)) {
 
-#ifdef CONFIG_USB_CPUMODE
 		s3c_usb_set_inep_xfersize(EP_TYPE_BULK, 1, strlen(reply_msg));
 
 		/*ep3 enable, clear nak, bulk, usb active, next ep3, max pkt 64*/
 		writel(1u<<31|1<<26|2<<18|1<<15|otg.bulkin_max_pktsize<<0, S5P_OTG_DIEPCTL_IN);
 
 		s3c_usb_write_in_fifo((u8 *)reply_msg,strlen(reply_msg)); 
-#else
-		s3c_usb_bulk_inep_setdma((u8 *)reply_msg, strlen(reply_msg));
-#endif
 
 		fboot_response_flag=0;
 	}
@@ -203,15 +195,10 @@ void fboot_usb_int_bulkin(void)
 	return;
 }
 
-#ifdef CONFIG_USB_CPUMODE
 void fboot_usb_int_bulkout(u32 fifo_cnt_byte)
-#else
-void fboot_usb_int_bulkout( void )
-#endif
 {
 	DBG_BULK0("@@\n Bulk Out Function : otg.dn_filesize=0x%x\n", otg.dn_filesize);
 
-#ifdef CONFIG_USB_CPUMODE
 	s3c_usb_read_out_fifo((u8 *)fastboot_bulk_fifo, fifo_cnt_byte);
 	if (fifo_cnt_byte<64) {
 		fastboot_bulk_fifo[fifo_cnt_byte] = 0x00; // append null
@@ -221,25 +208,13 @@ void fboot_usb_int_bulkout( void )
 	/*ep3 enable, clear nak, bulk, usb active, next ep3, max pkt 64*/
 	writel(1u<<31|1<<26|2<<18|1<<15|otg.bulkout_max_pktsize<<0,
 			S5P_OTG_DOEPCTL_OUT);
-#else
-	u32 xfer_size, cnt_byte;
-	xfer_size = readl(S5P_OTG_DOEPTSIZ_OUT) & 0x7FFF;
-	cnt_byte = HS_BULK_PKT_SIZE - xfer_size;
-	if(cnt_byte < HS_BULK_PKT_SIZE)
-		tmp_buf[cnt_byte] = 0x00;
-#endif
 
 	/* Pass this up to the interface's handler */
 	if (fastboot_interface && fastboot_interface->rx_handler) {
 		/* Call rx_handler at common/cmd_fastboot.c */
-#ifdef CONFIG_USB_CPUMODE
-		if (!fastboot_interface->rx_handler(&fastboot_bulk_fifo[0], fifo_cnt_byte));//OK 
+		if (!fastboot_interface->rx_handler(&fastboot_bulk_fifo[0], fifo_cnt_byte))
+			;//OK 
 	}
-#else
-		if (!fastboot_interface->rx_handler(&tmp_buf, cnt_byte));
-	}
-	s3c_usb_bulk_outep_setdma(tmp_buf, HS_BULK_PKT_SIZE);
-#endif
 }
 
 void fboot_usb_set_descriptors(void)
@@ -409,12 +384,7 @@ int fastboot_poll(void)
 	if (!FBOOT_USBD_IS_CONNECTED())
 		return FASTBOOT_DISCONNECT;
 
-#ifdef CONFIG_USB_CPUMODE
-	else if (FBOOT_USBD_DETECT_IRQ_CPUMODE()) {
-#else
-	else if (FBOOT_USBD_DETECT_IRQ_DMAMODE()) {
-
-#endif
+	else if (FBOOT_USBD_DETECT_IRQ()) {
 		if (!fboot_usb_int_hndlr())
 			ret = FASTBOOT_OK;
 		else
@@ -441,9 +411,6 @@ int fastboot_tx_status(const char *buffer, unsigned int buffer_size, const u32 n
 	//printf("    Response - \"%s\" (%d bytes)\n", buffer, buffer_size);
 	reply_msg = buffer;
 	fboot_response_flag=1;
-#ifndef CONFIG_USB_CPUMODE
-	fboot_usb_int_bulkin();
-#endif
 	if (need_sync_flag)
 	{
 		while(fboot_response_flag)

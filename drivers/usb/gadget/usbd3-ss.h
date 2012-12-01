@@ -70,19 +70,18 @@
 #define TEST_PACKET			4
 #define TEST_FORCE_ENABLE		5
 
-#define USB_DEVICE			0
-#define USB_HOST			1
-#define USB_OTG				2
+#define USB_DEVICE	0
+#define USB_HOST		1
+#define USB_OTG		2
 
 #define FULL_SPEED_CONTROL_PKT_SIZE	64
-#define FULL_SPEED_BULK_PKT_SIZE	64
+#define FULL_SPEED_BULK_PKT_SIZE		64
 
 #define HIGH_SPEED_CONTROL_PKT_SIZE	64
-#define HIGH_SPEED_BULK_PKT_SIZE	512
+#define HIGH_SPEED_BULK_PKT_SIZE		512
 
-#define SUPER_SPEED_CONTROL_PKT_EXP_SZ	9	// 2^9 = 512
 #define SUPER_SPEED_CONTROL_PKT_SIZE	512
-#define SUPER_SPEED_BULK_PKT_SIZE	1024
+#define SUPER_SPEED_BULK_PKT_SIZE		1024
 
 typedef struct
 {
@@ -280,9 +279,7 @@ enum STANDARD_REQUEST_CODE
 	STANDARD_SET_CONFIGURATION  = 9,
 	STANDARD_GET_INTERFACE      = 10,
 	STANDARD_SET_INTERFACE      = 11,
-	STANDARD_SYNCH_FRAME        = 12,
-	STANDARD_SET_SEL	    = 48,
-	STANDARD_ISOCH_DELY	    = 49,
+	STANDARD_SYNCH_FRAME        = 12
 };
 
 
@@ -350,21 +347,6 @@ typedef enum
 	USBPHY1,
 }USB_PHY;
 
-typedef enum {
-	DIFF_100MHz,
-	DIFF_24MHz,
-	DIFF_20MHz,
-	DIFF_19_2MHz,
-
-	EXTREF_50MHz,
-	EXTREF_24MHz,
-	EXTREF_20MHz,
-	EXTREF_19_2MHz,
-	EXTREF_12MHz,
-	EXTREF_10MHz,
-	EXTREF_9_6MHz,
-}USB3_PHY_CLKFREQ;
-
 typedef struct
 {
 	u8 ConfigurationValue;
@@ -398,35 +380,9 @@ typedef struct Usb_st_REG
 //==================================================================
 // CSR STRUCTURE
 //
-// PHYUTMI
-typedef union
-{
-        u32 data;       // reset value : 0x00000630
-        struct {
-                // bit[0] : force sleep
-                unsigned force_sleep:1;
-                // bit[1] : force suspend
-                unsigned force_suspend:1;
-                // bit[2] : dmpulldown
-                unsigned dm_pulldown:1;
-                // bit[3] : dppulldown
-                unsigned dp_pulldown:1;
-                // bit[4] : drvvbus
-                unsigned drvvbus:1;
-                // bit[5] : idpullup
-                unsigned id_pullup:1;
-                // bit[6] : otg disable
-                unsigned otg_disable:1;
-                // bit[8:7] : reserved
-                unsigned rsvd8_7:2;
-                // bit[9] : external vbus valid indicator (to phy)
-                unsigned vbusvld_ext:1;
-                // bit[10] : external vbus valid select
-                unsigned vbusvld_extsel:1;
-                // bit[31:11] : reserved
-                unsigned rsvd31_11:21;
-        }b;
-} usb3_phy_utmi_t;
+
+
+
 // PHYCLKPWR
 typedef union
 {
@@ -465,6 +421,9 @@ typedef union
 			unsigned rsvd31:1;
         }b;
 } usbdev3_phy_clkpwr_t;
+
+
+
 //-----------------------
 // Global Registers (Gxxxx)
 //-----------------------
@@ -513,16 +472,10 @@ typedef union
 {
 	u32 data;	// reset value : 0x30c02000
 	struct {
-		// bit[0] : Disable Clock Gating in LP Mode ( 0:Enable, 1:disable )
+		// bit[0] :
 		unsigned dis_clk_gating:1;
-		// bit[1] : HS/FS/LS Module Power Clamp
-		unsigned HsFsLsPwrClmp:1;
-		// bit[2] : SS Module Power Clamp
-		unsigned SsPwrClmp:1;
-		// bit[3] : Disable Data Scrambling in SS ( 0:enable, 1:disable )
-		unsigned DisScramble:1;
-		// bit[5:4] : Scale Down : for simulation
-		unsigned ScaleDown:2;
+		// bit[5:1] :
+		unsigned rsvd5_1:5;
 		// bit[7:6] : ram clock select (0:bus, 1:pipe, 2:pipe/2, 3:rsvd)
 		unsigned  ram_clk_sel:2;
 		// bit[8] : debug attach
@@ -1083,9 +1036,6 @@ typedef struct
 
 	// Buffer for GET_STATUS & GET_DESCRIPTOR up to 512 bytes in length
 	u32 m_uStatusBufAddr;
-
-	// SET_SEL request pending info
-	u8 m_bReq_Set_sel;
 
 	// TRB for Setup Packet
 	volatile usbdev3_trb_ptr_t m_oSetupTrbPtr;

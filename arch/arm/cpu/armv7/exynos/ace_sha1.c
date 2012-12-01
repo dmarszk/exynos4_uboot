@@ -23,7 +23,7 @@
 #include <asm/arch/ace_sfr.h>
 
 
-#if (defined(CONFIG_S5PV210) || defined(CONFIG_S5PC110) || defined(CONFIG_S5PV310) || defined(CONFIG_S5PC210)) || defined(CONFIG_ARCH_EXYNOS)
+#if (defined(CONFIG_S5PV210) || defined(CONFIG_S5PC110) || defined(CONFIG_S5PV310) || defined(CONFIG_S5PC210))
 
 /*****************************************************************
 	Definitions

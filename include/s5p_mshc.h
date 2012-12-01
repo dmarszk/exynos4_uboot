@@ -70,16 +70,11 @@
 #define MSHCI_CLKSEL	0x9C    /* Drv/sample clock selection register */
 #define MSHCI_WAKEUPCON 0xA0    /* Wakeup control register */
 #define MSHCI_CLOCKCON  0xA4    /* Clock (delay) control register */
-#define MSHCI_FIFODAT(x)	(x)	/* FIFO data read write */
-
-/*****************************************************
-* IP Version Control
- *****************************************************/
-#define MSHCI_220A_FIFODAT	0x100	/* FIFO data read write */
-#define MSHCI_240A_FIFODAT 	0x200	/* FIFO data read write */
-
-#define VERID_240A	0x240a
-#define GET_VERID(x)	((x) & 0xFFFF)
+#if !(defined(CONFIG_EXYNOS4212) || defined(CONFIG_ARCH_EXYNOS5))
+#define MSHCI_FIFODAT 	0x100	/* FIFO data read write */
+#else
+#define MSHCI_FIFODAT 	0x200	/* FIFO data read write */
+#endif
 
 /*****************************************************
  *  Control Register  Register
@@ -360,21 +355,28 @@ struct mshci_idmac {
 struct mshci_host {
 	/* Data set by hardware interface driver */
 	const char		*hw_name;	/* Hardware bus name */
+
 	int			irq;		/* Device IRQ */
 	void __iomem *		ioaddr;		/* Mapped address */
+
 	/* Internal data */
 	struct mmc		*mmc;		/* MMC structure */
 	u64			dma_mask;	/* custom DMA mask */
+
 	int			flags;		/* Host attributes */
 #define MSHCI_USE_IDMA		(1<<1)		/* Host is ADMA capable */
 #define MSHCI_REQ_USE_DMA	(1<<2)		/* Use DMA for this req. */
 #define MSHCI_DEVICE_DEAD	(1<<3)		/* Device unresponsive */
+
+
 	unsigned int		version;	/* SDHCI spec. version */
-	unsigned int		data_offset;	/* DATA offset */
+
 	unsigned int		max_clk;	/* Max possible freq (MHz) */
 	unsigned int		timeout_clk;	/* Timeout freq (KHz) */
+
 	unsigned int		clock;		/* Current clock (MHz) */
 	unsigned short		power;		/* Current voltage */
+
 	dma_addr_t		adma_addr;	/* Mapped ADMA descr. table */
 };
 
@@ -387,5 +389,6 @@ static inline u32 mshci_readl(struct mshci_host *host, int reg)
 {
 	return readl(host->ioaddr + reg);
 }
+
 #endif
 

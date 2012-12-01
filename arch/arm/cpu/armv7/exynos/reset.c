@@ -13,10 +13,26 @@
 #include <common.h>
 #include <asm/arch/cpu.h>
 
+#if defined(CONFIG_HKDK4412)
+#include <asm/arch/gpio.h>
+#endif
 /* * reset the cpu by setting up the watchdog timer and let him time out */
 void reset_cpu(ulong ignored)
 {
+
+#if defined(CONFIG_HKDK4412)
+	emmc_pwr_reset();
+
+	GPIO_Init();
+
+	GPIO_SetFunctionEach(eGPIO_K1, eGPIO_2, eGPO);
+//	GPIO_SetPullUpDownEach(eGPIO_K1, eGPIO_2, 0);
+	GPIO_SetDataEach(eGPIO_K1, eGPIO_2, 0);
+	udelay (50000);				/* wait 50 ms */
+	GPIO_SetDataEach(eGPIO_K1, eGPIO_2, 1);
+
 	printf("reset... \n\n\n");
+#endif
 
 	SW_RST_REG = 0x1;
 

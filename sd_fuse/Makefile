@@ -27,6 +27,7 @@ SOURCES = $(OBJECTS:.o=.c)
 all:
 	$(CC) $(CFLAGS)	mkbl2 V310-EVT1-mkbl2.c 
 	$(CC) $(CFLAGS)	sd_fdisk sd_fdisk.c
+	$(CC) $(CFLAGS)	c210-mkbl1 c210-mkbl1.c 
 
 #---------------------------------------------------------------------------------------
 .c.o:

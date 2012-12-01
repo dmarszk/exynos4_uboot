@@ -19,19 +19,9 @@
 void clear_hsmmc_clock_div(void)
 {
 #if defined(CONFIG_EXYNOS4212) || defined(CONFIG_ARCH_EXYNOS5)
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	CLK_DIV_FSYS1 = 0x00080001;
-	CLK_DIV_FSYS2 = 0x00080001;
-#elif defined(CONFIG_EXYNOS4412_EVT1)
-	CLK_DIV_FSYS1 = 0x00070007;
-	CLK_DIV_FSYS2 = 0x00070007;
-	CLK_DIV_FSYS3 = 0x00000100;
-#else	
-	CLK_DIV_FSYS1 = 0x00080008;
-	CLK_DIV_FSYS2 = 0x00080008;
-	CLK_DIV_FSYS3 = 0x00000500;
-#endif
-
+	CLK_DIV_FSYS1 = 0x000f000f;
+	CLK_DIV_FSYS2 = 0x000f000f;
+	CLK_DIV_FSYS3 = 0x00000300;
 #else
 	CLK_DIV_FSYS1 = 0x00070007;
 	CLK_DIV_FSYS2 = 0x00070007;
@@ -47,35 +37,7 @@ void set_hsmmc_pre_ratio (struct sdhci_host *host, uint clock)
 	u32 i;
 
 #ifdef USE_MMC0
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	/* MMC0 clock div */
-	div = CLK_DIV_FSYS1 & ~(0x0000ff00);
-	tmp = CLK_DIV_FSYS1 & (0x0000000f);
-
-	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)) & 0xF;
-	switch (i) {
-	default : clk = 0; break;
-	case 0:
-	case 1: clk = CONFIG_SYS_CLK_FREQ; break;
-	case 2: clk = 27000000; break;
-	//case 3: clk = /*SCLK_DPTXPHY*/; break;
-	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
-	//case 5: clk = /*SCLK_HDMIPHY*/; break;
-	case 6: clk = get_MPLL_CLK(); break;
-	case 7: clk = get_BPLL_CLK(); break;
-	case 8: clk = get_VPLL_CLK(); break;
-	//case 9: clk = get_CPLL_CLK(); break;
-	}
-	clk = clk / (tmp + 1);
-	for(i=0 ; i<=0xff; i++)
-	{
-		if((clk /(i+1)) <= clock) {
-			CLK_DIV_FSYS1 = tmp | i<<8;
-			break;
-		}
-	}
-#else
-	/* MMC0 clock div */
+	/* MMC2 clock div */
 	div = CLK_DIV_FSYS1 & ~(0xff000000);
 	tmp = CLK_DIV_FSYS1 & (0x000f0000);
 
@@ -88,29 +50,16 @@ void set_hsmmc_pre_ratio (struct sdhci_host *host, uint clock)
 			break;
 		}
 	}
-
-#endif
 #endif
 #ifdef USE_MMC2
 	/* MMC2 clock div */
 	div = CLK_DIV_FSYS2 & ~(0x0000ff00);
 	tmp = CLK_DIV_FSYS2 & (0x0000000f);
 
-	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)>>8) & 0xF;
-	switch (i) {
-	default : clk = 0; break;
-	case 0:
-	case 1: clk = CONFIG_SYS_CLK_FREQ; break;
-	case 2: clk = 27000000; break;
-	//case 3: clk = /*SCLK_DPTXPHY*/; break;
-	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
-	//case 5: clk = /*SCLK_HDMIPHY*/; break;
-	case 6: clk = get_MPLL_CLK(); break;
-	case 7: clk = get_BPLL_CLK(); break;
-	case 8: clk = get_VPLL_CLK(); break;
-	//case 9: clk = get_CPLL_CLK(); break;
-	}
+	clk = get_MPLL_CLK();
+#if 1
 	clk = clk / (tmp + 1);
+
 	for(i=0 ; i<=0xff; i++)
 	{
 		if((clk /(i+1)) <= clock) {
@@ -118,6 +67,9 @@ void set_hsmmc_pre_ratio (struct sdhci_host *host, uint clock)
 			break;
 		}
 	}
+#else 
+	CLK_DIV_FSYS2 = 0x000f000f;
+#endif 
 #endif
 }
 
@@ -128,88 +80,43 @@ void setup_hsmmc_clock(void)
 	u32 i;
 
 #ifdef USE_MMC0
-	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)) & 0xF;
+	/* MMC0 clock src = SCLKMPLL */
+	tmp = CLK_SRC_FSYS & ~(0x0000000f);
+	CLK_SRC_FSYS = tmp | 0x00000006;
 
 	/* MMC0 clock div */
-	tmp = CLK_DIV_FSYS1 & ~(0x0000ff0f);
-#ifndef CONFIG_CPU_EXYNOS5250_EVT1
-	switch (i) {
-	default : clock = 0; break;
-	case 0:
-	case 1: clock = CONFIG_SYS_CLK_FREQ; break;
-	case 2: clock = 27000000; break;
-	//case 3: clk = /*SCLK_DPTXPHY*/; break;
-	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
-	//case 5: clk = /*SCLK_HDMIPHY*/; break;
-	case 6: clock = get_MPLL_CLK(); break;
-	case 7: clock = get_BPLL_CLK(); break;
-	case 8: clock = get_VPLL_CLK(); break;
-	//case 9: clk = get_CPLL_CLK(); break;
-	}
-	clock = clock / 1000000;
+	tmp = CLK_DIV_FSYS1 & ~(0x0000000f);
+	clock = get_MPLL_CLK()/1000000;
 	for(i=0; i<= 0xf; i++)
 	{
-		if((clock / (i+1)) <= 400) {
+	//	if((clock / (i+1)) <= 90) {
+		if((clock / (i+1)) <= 50) {
 			CLK_DIV_FSYS1 = tmp | i<<0;
 			break;
 		}
 	}
-#else
-	clock = get_MPLL_CLK()/1000000;
-	for(i=0 ; i<=0xf; i++)
-	{
-		if((clock /(i+1)) <= 400) {
-			CLK_DIV_FSYS1 = tmp | i<<0;
-			break;
-		}
-	}
-#endif
 #endif
 
 #ifdef USE_MMC1
 #endif	
 
 #ifdef USE_MMC2
-	i = (readl(ELFIN_CLOCK_BASE + CLK_SRC_FSYS_OFFSET)>>8) & 0xF;
+	/* MMC2 clock src = SCLKMPLL */
+	tmp = CLK_SRC_FSYS & ~(0x00000f00);
+	CLK_SRC_FSYS = tmp | 0x00000600;
 
 	/* MMC2 clock div */
-	tmp = CLK_DIV_FSYS2 & ~(0x0000ff0f);
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	switch (i) {
-	default : clock = 0; break;
-	case 0:
-	case 1: clock = CONFIG_SYS_CLK_FREQ; break;
-	case 2: clock = 27000000; break;
-	//case 3: clk = /*SCLK_DPTXPHY*/; break;
-	//case 4: clk = /*SCLK_USBHOST20PHY*/; break;
-	//case 5: clk = /*SCLK_HDMIPHY*/; break;
-	case 6: clock = get_MPLL_CLK(); break;
-	case 7: clock = get_BPLL_CLK(); break;
-	case 8: clock = get_VPLL_CLK(); break;
-	//case 9: clk = get_CPLL_CLK(); break;
-	}
-	clock = clock / 1000000;
-	for(i=0; i<= 0xf; i++)
-	{
-		if((clock / (i+1)) <= 400) {
-			CLK_DIV_FSYS2 = tmp | i<<0;
-			break;
-		}
-	}
-#else
+	tmp = CLK_DIV_FSYS2 & ~(0x0000000f);
 	clock = get_MPLL_CLK()/1000000;
 	for(i=0; i<= 0xf; i++)
 	{
-#if defined(CONFIG_EXYNOS4412_EVT1)
-		if((clock / (i+1)) <= 50) {
-#else
 		if((clock / (i+1)) <= 90) {
-#endif
+		//if((clock / (i+1)) <= 50) {
+		//if((clock / (i+1)) <= 40) {
 			CLK_DIV_FSYS2 = tmp | i<<0;
 			break;
 		}
 	}
-#endif
 #endif
 
 #ifdef USE_MMC3
@@ -225,12 +132,8 @@ void setup_hsmmc_clock(void)
 	clock = get_MPLL_CLK()/1000000;
 	for(i=0 ; i<=0xf; i++)
 	{
-#if defined(CONFIG_EXYNOS4212) || defined(CONFIG_ARCH_EXYNOS5)
-	#ifdef CONFIG_EXYNOS4412_EVT1
-		if((clock /(i+1)) <= 400) {
-	#else
-		if((clock /(i+1)) <= 140) {
-	#endif
+#if defined(CONFIG_EXYNOS4212) || defined(CONFIG_EXYNOS5)
+		if((clock /(i+1)) <= 170) {
 #else
 		if((clock /(i+1)) <= 160) {
 #endif
@@ -248,15 +151,6 @@ void setup_hsmmc_clock(void)
 void setup_hsmmc_cfg_gpio(void)
 {
 #ifdef USE_MMC0
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	writel(0x02222222, GPIO_CON_MMC0_1);
-	writel(0x00003FF0, GPIO_CON_MMC0_1 + GPIO_PUD_OFFSET);
-	writel(0x00003FFF, GPIO_CON_MMC0_1 + GPIO_DRV_OFFSET);
-
-	writel(0x00002222, GPIO_CON_MMC0_2);
-	writel(0x000000FF, GPIO_CON_MMC0_2 + GPIO_PUD_OFFSET);
-	writel(0x000000FF, GPIO_CON_MMC0_2 + GPIO_DRV_OFFSET);
-#else
 	writel(0x02222222, GPIO_CON_MMC0_1);
 	writel(0x00003FF0, GPIO_CON_MMC0_1 + GPIO_PUD_OFFSET);
 	writel(0x00003FFF, GPIO_CON_MMC0_1 + GPIO_DRV_OFFSET);
@@ -265,17 +159,11 @@ void setup_hsmmc_cfg_gpio(void)
 	writel(0x00003FF0, GPIO_CON_MMC0_2 + GPIO_PUD_OFFSET);
 	writel(0x00003FFF, GPIO_CON_MMC0_2 + GPIO_DRV_OFFSET);
 #endif
-#endif
 
 #ifdef USE_MMC1
 #endif
 
 #ifdef USE_MMC2
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	writel(0x02222222, GPIO_CON_MMC2_2);
-	writel(0x00003FF0, GPIO_CON_MMC2_2 + GPIO_PUD_OFFSET);
-	writel(0x00003FFF, GPIO_CON_MMC2_2 + GPIO_DRV_OFFSET);
-#else
 	writel(0x02222222, GPIO_CON_MMC2_1);
 	writel(0x00003FF0, GPIO_CON_MMC2_1 + GPIO_PUD_OFFSET);
 	writel(0x00003FFF, GPIO_CON_MMC2_1 + GPIO_DRV_OFFSET);
@@ -283,7 +171,6 @@ void setup_hsmmc_cfg_gpio(void)
 	writel(0x03333000, GPIO_CON_MMC2_2);
 	writel(0x00003FF0, GPIO_CON_MMC2_2 + GPIO_PUD_OFFSET);
 	writel(0x00003FFF, GPIO_CON_MMC2_2 + GPIO_DRV_OFFSET);
-#endif
 #endif
 
 #ifdef USE_MMC3
@@ -293,9 +180,16 @@ void setup_hsmmc_cfg_gpio(void)
 	writel(0x03333333, GPIO_CON_MMC4_1);
 	writel(0x00003FF0, GPIO_CON_MMC4_1 + GPIO_PUD_OFFSET);
 	writel(0x00002AAA, GPIO_CON_MMC4_1 + GPIO_DRV_OFFSET);
+
+#if defined(CONFIG_HKDK4212)
+	writel(0x04444100, GPIO_CON_MMC4_2);
+	writel(0x00003FF0, GPIO_CON_MMC4_2 + GPIO_PUD_OFFSET);
+	writel(0x00002AA0, GPIO_CON_MMC4_2 + GPIO_DRV_OFFSET);
+#else
 	writel(0x04444000, GPIO_CON_MMC4_2);
 	writel(0x00003FC0, GPIO_CON_MMC4_2 + GPIO_PUD_OFFSET);
 	writel(0x00002A80, GPIO_CON_MMC4_2 + GPIO_DRV_OFFSET);
+#endif
 
 #ifndef	CONFIG_ARCH_EXYNOS5
 	/* Drive Strength */
@@ -305,9 +199,9 @@ void setup_hsmmc_cfg_gpio(void)
 #endif
 }
 
+
 void setup_sdhci0_cfg_card(struct sdhci_host *host)
 {
-#if !defined(CONFIG_CPU_EXYNOS5250_EVT1)
 	u32 ctrl2;
 	u32 ctrl3;
 
@@ -323,51 +217,17 @@ void setup_sdhci0_cfg_card(struct sdhci_host *host)
 		S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
 
 	if (0 <= host->clock && host->clock < 25000000) {
-#if defined(CONFIG_SMDKC220)
-
-#if defined(CONFIG_EXYNOS4412_EVT1)
 		/* Feedback Delay Disable */
 		ctrl2 &= ~(S3C_SDHCI_CTRL2_ENFBCLKTX |
 			S3C_SDHCI_CTRL2_ENFBCLKRX);
-#else
-		/* Feedback Delay Enable */
-		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
-#endif
-
-#else
-		/* Feedback Delay Disable */
-		ctrl2 &= ~(S3C_SDHCI_CTRL2_ENFBCLKTX |
-			S3C_SDHCI_CTRL2_ENFBCLKRX);
-#endif
-
 		ctrl3 &= ~(1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
 
 	} else if (25000000 <= host->clock && host->clock <= 52000000) {
-#if defined(CONFIG_SMDKC220) || defined(CONFIG_ARCH_EXYNOS5)
-
-#if defined(CONFIG_EXYNOS4412_EVT1) || defined(CONFIG_CPU_EXYNOS5250)
-		/* Feedback Delay Tx/Rx Disable */
-		ctrl2 &= ~(S3C_SDHCI_CTRL2_ENFBCLKTX |
-			S3C_SDHCI_CTRL2_ENFBCLKRX);
-
-		/* Feedback Delay Rx Enable */
-		ctrl2 |= S3C_SDHCI_CTRL2_ENFBCLKRX;
-
-		/* Rx Inverter Delay */
-		ctrl3 &= ~(1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
-		ctrl3 |= (1 << 15 | 1 << 7);
-#else
+#ifdef CONFIG_HKDK4412
 		/* Feedback Delay Enable */
 		ctrl2 |= (S3C_SDHCI_CTRL2_ENFBCLKTX | S3C_SDHCI_CTRL2_ENFBCLKRX);
 
-#if defined(CONFIG_ARCH_EXYNOS5)
 		ctrl3 |= (1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
-#else
-		ctrl3 &= ~(1 << 31 | 1 << 23 | 1 << 15 | 1 << 7);
-#endif
-
-#endif
-
 #else
 		/* Feedback Delay Disable */
 		ctrl2 &= ~(S3C_SDHCI_CTRL2_ENFBCLKTX |
@@ -383,5 +243,5 @@ void setup_sdhci0_cfg_card(struct sdhci_host *host)
 
 	writel(ctrl2, host->ioaddr + S3C_SDHCI_CONTROL2);
 	writel(ctrl3, host->ioaddr + S3C_SDHCI_CONTROL3);
-#endif /* CONFIG_CPU_EXYNOS5250_EVT1 */
 }
+

@@ -18,12 +18,6 @@
 
 #include <asm/arch/cpu.h>
 
-#define CORE2_RATIO	0x0
-#define PCLK_DBG_RATIO	0x1
-#define PERIPH_RATIO	0x0
-#define CORE_RATIO	0x0
-#define HPM_RATIO	0x0
-
 /* ARM_CLOCK_800Mhz */
 #if defined(CONFIG_CLK_ARM_800_APLL_800)
 #define APLL_MDIV	0x64
@@ -32,12 +26,17 @@
 
 /* CLK_DIV_CPU0	*/
 #define APLL_RATIO	0x1
+#define PCLK_DBG_RATIO	0x1
 #define ATB_RATIO	0x3
+#define PERIPH_RATIO	0x7
 #define COREM1_RATIO	0x5
 #define COREM0_RATIO	0x2
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
 
 /* CLK_DIV_CPU1	*/
 #define CORES_RATIO	0x3
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x3
 
 /* ARM_CLOCK_1Ghz */
@@ -48,12 +47,17 @@
 
 /* CLK_DIV_CPU0	*/
 #define APLL_RATIO	0x1
-#define ATB_RATIO	0x4
-#define COREM1_RATIO	0x5
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
 #define COREM0_RATIO	0x2
+#define COREM1_RATIO	0x5
+#define PERIPH_RATIO	0x7
+#define ATB_RATIO	0x4
+#define PCLK_DBG_RATIO	0x1
 
 /* CLK_DIV_CPU1	*/
-#define CORES_RATIO	0x4
+#define CORES_RATIO	0x3
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x4
 
 /* ARM_CLOCK_1.2Ghz */
@@ -63,12 +67,17 @@
 #define APLL_SDIV	0x0
 
 #define APLL_RATIO	0x2
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
 #define COREM0_RATIO	0x3
 #define COREM1_RATIO	0x6
+#define PERIPH_RATIO	0x7
 #define ATB_RATIO	0x4
+#define PCLK_DBG_RATIO	0x1
 
 /* CLK_DIV_CPU1	*/
 #define CORES_RATIO	0x4
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x4
 
 /* ARM_CLOCK_1.2Ghz */
@@ -78,12 +87,17 @@
 #define APLL_SDIV	0x0
 
 #define APLL_RATIO	0x2
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
 #define COREM0_RATIO	0x3
 #define COREM1_RATIO	0x7
+#define PERIPH_RATIO	0x7
 #define ATB_RATIO	0x5
+#define PCLK_DBG_RATIO	0x1
 
 /* CLK_DIV_CPU1	*/
 #define CORES_RATIO	0x4
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x5
 
 /* ARM_CLOCK_1.2Ghz */
@@ -93,12 +107,17 @@
 #define APLL_SDIV	0x0
 
 #define APLL_RATIO	0x2
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
 #define COREM0_RATIO	0x3
 #define COREM1_RATIO	0x7
+#define PERIPH_RATIO	0x7
 #define ATB_RATIO	0x5
+#define PCLK_DBG_RATIO	0x1
 
 /* CLK_DIV_CPU1	*/
 #define CORES_RATIO	0x5
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x5
 
 /* ARM_CLOCK_1.2Ghz */
@@ -108,12 +127,17 @@
 #define APLL_SDIV	0x0
 
 #define APLL_RATIO	0x2
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
 #define COREM0_RATIO	0x3
 #define COREM1_RATIO	0x7
+#define PERIPH_RATIO	0x7
 #define ATB_RATIO	0x6
+#define PCLK_DBG_RATIO	0x1
 
 /* CLK_DIV_CPU1	*/
 #define CORES_RATIO	0x5
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x6
 
 /* ARM_CLOCK_1.5Ghz */
@@ -123,12 +147,17 @@
 #define APLL_SDIV	0x0
 
 #define APLL_RATIO	0x2
-#define ATB_RATIO	0x6
+#define CORE_RATIO	0x0
+#define CORE2_RATIO	0x0
+#define COREM0_RATIO	0x4
 #define COREM1_RATIO	0x7
-#define COREM0_RATIO	0x3
+#define PERIPH_RATIO	0x7
+#define ATB_RATIO	0x6
+#define PCLK_DBG_RATIO	0x1
 
 /* CLK_DIV_CPU1	*/
-#define CORES_RATIO	0x7
+#define CORES_RATIO	0x5
+#define HPM_RATIO	0x0
 #define COPY_RATIO	0x6
 
 #endif
@@ -161,10 +190,10 @@
 #endif
 
 /* APLL_CON1	*/
-#define APLL_CON1_VAL	(0x00203800)
+#define APLL_CON1_VAL	(0x00803800)
 
 /* MPLL_CON1	*/
-#define MPLL_CON1_VAL (0x00203800)
+#define MPLL_CON1_VAL (0x00803800)
 
 #define EPLL_MDIV	0x40
 #define EPLL_PDIV	0x2
@@ -173,9 +202,9 @@
 #define EPLL_CON1_VAL	0x66010000
 #define EPLL_CON2_VAL	0x00000080
 
-#define VPLL_MDIV	0xAF
-#define VPLL_PDIV	0x3
-#define VPLL_SDIV	0x2
+#define VPLL_MDIV	0x48
+#define VPLL_PDIV	0x2
+#define VPLL_SDIV	0x3
 
 #define VPLL_CON1_VAL	0x66010000
 #define VPLL_CON2_VAL	0x00000080
@@ -188,15 +217,6 @@
 #define MPLL_CON0_VAL	set_pll(MPLL_MDIV,MPLL_PDIV,MPLL_SDIV)
 #define EPLL_CON0_VAL	set_pll(EPLL_MDIV,EPLL_PDIV,EPLL_SDIV)
 #define VPLL_CON0_VAL	set_pll(VPLL_MDIV,VPLL_PDIV,VPLL_SDIV)
-
-/* APLL_LOCK	*/
-#define APLL_LOCK_VAL	(APLL_PDIV * 270)
-/* MPLL_LOCK	*/
-#define MPLL_LOCK_VAL	(MPLL_PDIV * 270)
-/* EPLL_LOCK	*/
-#define EPLL_LOCK_VAL	(EPLL_PDIV * 3000)
-/* VPLL_LOCK	*/
-#define VPLL_LOCK_VAL	(VPLL_PDIV * 3000)
 
 
 /* CLK_SRC_CPU	*/
@@ -242,39 +262,25 @@
 #define COPY2_RATIO		0x0
 #define DMCP_RATIO		0x1
 #define DMCD_RATIO		0x1
-
 #if defined(CONFIG_CLK_BUS_DMC_100_200)
 #define DMC_RATIO		0x3
 #else
 #define DMC_RATIO		0x1
 #endif
-
 #define DPHY_RATIO		0x1
 #define ACP_PCLK_RATIO		0x1
 #define ACP_RATIO		0x3
 
-#define CLK_DIV_DMC0_VAL	((DMCP_RATIO << 20)	\
+#define CLK_DIV_DMC0_VAL	((CORE_TIMERS_RATIO << 28) \
+							| (COPY2_RATIO << 24) \
+							| (DMCP_RATIO << 20)	\
 							| (DMCD_RATIO << 16)	\
 							| (DMC_RATIO << 12)	\
 							| (DPHY_RATIO << 8)	\
 							| (ACP_PCLK_RATIO << 4)	\
 							| (ACP_RATIO))
 
-/* CLK_DIV_DMC1	*/
-#define DPM_RATIO		0x1
-#define DVSEM_RATIO		0x1
-#define C2C_ACLK_RATIO		0x1
-#define PWI_RATIO		0xF
-#define C2C_RATIO		0x1
-#define G2D_ACP_RATIO		0x3
-
-#define CLK_DIV_DMC1_VAL	((DPM_RATIO << 24) \
-							| (DVSEM_RATIO << 16)	\
-							| (C2C_ACLK_RATIO << 12)\
-							| (PWI_RATIO << 8)	\
-							| (C2C_RATIO << 4)	\
-							| (G2D_ACP_RATIO))
-
+#define CLK_DIV_DMC1_VAL	0x07071713
 
 /* CLK_SRC_TOP0	*/
 #define MUX_ONENAND_SEL 0x0 /* 0 = DOUT133, 1 = DOUT166		*/
@@ -335,6 +341,16 @@
 #define CLK_DIV_RIGHTBUS_VAL	((GPR_RATIO << 4) \
 								| (GDR_RATIO))
 
+/* APLL_LOCK	*/
+#define APLL_LOCK_VAL	(0x3E8)
+/* MPLL_LOCK	*/
+#define MPLL_LOCK_VAL	(0x2F1)
+/* EPLL_LOCK	*/
+#define EPLL_LOCK_VAL	(0x2321)
+/* VPLL_LOCK	*/
+#define VPLL_LOCK_VAL	(0x2321)
+
+
 /* CLK_SRC_PERIL0	*/
 #define PWM_SEL		0
 #define UART5_SEL	6
@@ -360,12 +376,12 @@
 #define UART1_RATIO	7
 #define UART0_RATIO	7
 #elif defined(CONFIG_CLK_BUS_DMC_200_400)
-#define UART5_RATIO	7
-#define UART4_RATIO	7
-#define UART3_RATIO	7
-#define UART2_RATIO	7
-#define UART1_RATIO	7
-#define UART0_RATIO	7
+#define UART5_RATIO	8
+#define UART4_RATIO	8
+#define UART3_RATIO	8
+#define UART2_RATIO	8
+#define UART1_RATIO	8
+#define UART0_RATIO	8
 #endif
 
 #define CLK_DIV_PERIL0_VAL	((UART5_RATIO << 20) \
@@ -385,8 +401,8 @@
 #define UART_UBRDIV_VAL	0x2B/* (SCLK_UART/(115200*16) -1) */
 #define UART_UDIVSLOT_VAL	0xC		/*((((SCLK_UART*10/(115200*16) -10))%10)*16/10)*/
 #elif defined(CONFIG_CLK_BUS_DMC_200_400)
-#define UART_UBRDIV_VAL	0x35     /* (SCLK_UART/(115200*16) -1) */
-#define UART_UDIVSLOT_VAL 0x4		/*((((SCLK_UART*10/(115200*16) -10))%10)*16/10)*/
+#define UART_UBRDIV_VAL	0x2F     /* (SCLK_UART/(115200*16) -1) */
+#define UART_UDIVSLOT_VAL 0x3		/*((((SCLK_UART*10/(115200*16) -10))%10)*16/10)*/
 #endif
 
 

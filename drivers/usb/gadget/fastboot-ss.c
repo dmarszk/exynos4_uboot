@@ -195,6 +195,7 @@ void fboot_usb_handle_ep_in_xfer_complete(void)
 	return;
 }
 
+#define FBOOT_TRB_BUF_SIZ_LIMIT (0x1000)
 int fboot_usb_handle_ep_out_xfer_complete(void)
 {
 	u32 usRxCnt;
@@ -206,9 +207,9 @@ int fboot_usb_handle_ep_out_xfer_complete(void)
 		Assert(0);
 	}
 
-	usRxCnt = oUsbDev3.m_uBulkEPMaxPktSize - g_pBulkOutTrb0->status.b.buf_siz;
+	usRxCnt = FBOOT_TRB_BUF_SIZ_LIMIT - g_pBulkOutTrb0->status.b.buf_siz;
 	
-	if (usRxCnt < oUsbDev3.m_uBulkEPMaxPktSize)
+	if (usRxCnt < FBOOT_TRB_BUF_SIZ_LIMIT)
 		g_ucTempDownBuf[usRxCnt] = 0;
 
 	/* Pass this up to the interface's handler */
@@ -227,7 +228,7 @@ int fboot_usb_handle_ep_out_xfer_complete(void)
 	usbdev3_trb_ctrl.b.ioc = 1;
 	usbdev3_trb_ctrl.b.strmid_sofn = 0;
 
-	exynos_usb_fill_trb(g_pBulkOutTrb0, (u32)g_ucTempDownBuf, oUsbDev3.m_uBulkEPMaxPktSize, usbdev3_trb_ctrl.data, 1);
+	exynos_usb_fill_trb(g_pBulkOutTrb0, (u32)g_ucTempDownBuf, FBOOT_TRB_BUF_SIZ_LIMIT, usbdev3_trb_ctrl.data, 1);
 
 	// . Issue Start Xfer for 1st Bulk Out Packet
 	//------------------------------------
@@ -244,11 +245,7 @@ void fboot_usb_set_descriptors_tlb(void)
 	/* Standard device descriptor */
 	oUsbDev3.m_oDesc.oDescDevice.bLength=DEVICE_DESC_SIZE;	/*0x12*/
 	oUsbDev3.m_oDesc.oDescDevice.bDescriptorType=DEVICE_DESCRIPTOR;
-	if (oUsbDev3.m_eSpeed == USBDEV3_SPEED_SUPER) {
-		oUsbDev3.m_oDesc.oDescDevice.bMaxPacketSize0=SUPER_SPEED_CONTROL_PKT_EXP_SZ;
-	} else {
-		oUsbDev3.m_oDesc.oDescDevice.bMaxPacketSize0=oUsbDev3.m_uControlEPMaxPktSize;
-	}
+	oUsbDev3.m_oDesc.oDescDevice.bMaxPacketSize0=oUsbDev3.m_uControlEPMaxPktSize;
 	oUsbDev3.m_oDesc.oDescDevice.bDeviceClass=0x0; /* 0x0*/
 	oUsbDev3.m_oDesc.oDescDevice.bDeviceSubClass=0x0;
 	oUsbDev3.m_oDesc.oDescDevice.bDeviceProtocol=0x0;

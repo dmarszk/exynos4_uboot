@@ -19,24 +19,6 @@
 #include "smdk4212_val.h"
 #endif
 
-wait_mux_state:
-	ldr r1, [r0, r2]
-	cmp r1, r3
-	bne wait_mux_state
-	mov pc, lr
-
-wait_pll_lock:
-	ldr r1, [r0, r2]
-	tst r1, #(1<<29)
-	beq wait_pll_lock
-	mov pc, lr
-
-wait_phy_state:
-	ldr r1, [r0, #DMC_PHYSTATUS]
-	tst r1, #(1<<2)
-	beq wait_phy_state
-	mov pc, lr
-
 /*
  * system_clock_init: Initialize core clock and bus clock.
  * void system_clock_init(void)
@@ -54,9 +36,10 @@ system_clock_init:
 	ldr	r2, =CLK_SRC_CPU_OFFSET
 	str	r1, [r0, r2]
 
-	ldr r2, =CLK_MUX_STAT_CPU_OFFSET
-	ldr r3, =0x01110001
-	bl wait_mux_state
+	/* wait ?us */
+	mov	r1, #0x10000
+1:	subs	r1, r1, #1
+	bne	1b
 
 	ldr	r1, =CLK_DIV_DMC0_VAL
 	ldr	r2, =CLK_DIV_DMC0_OFFSET
@@ -66,47 +49,45 @@ system_clock_init:
 	str	r1, [r0, r2]
 
 @ CMU_TOP MUX / DIV
-	ldr	r1, =0x0
+	ldr	r1, =CLK_SRC_TOP0_VAL
 	ldr	r2, =CLK_SRC_TOP0_OFFSET
 	str	r1, [r0, r2]
-
-	ldr r2, =CLK_MUX_STAT_TOP_OFFSET
-	ldr r3, =0x11111111
-	bl wait_mux_state
-
-	ldr	r1, =0x0
+	ldr	r1, =CLK_SRC_TOP1_VAL
 	ldr	r2, =CLK_SRC_TOP1_OFFSET
 	str	r1, [r0, r2]
 
-	ldr r2, =CLK_MUX_STAT_TOP1_OFFSET
-	ldr r3, =0x01111110
-	bl wait_mux_state
+	/* wait ?us */
+	mov	r1, #0x10000
+3:	subs	r1, r1, #1
+	bne	3b
 
 	ldr	r1, =CLK_DIV_TOP_VAL
 	ldr	r2, =CLK_DIV_TOP_OFFSET
 	str	r1, [r0, r2]
 
 @ CMU_LEFTBUS MUX / DIV
-	ldr	r1, =0x10
+	ldr	r1, =CLK_SRC_LEFTBUS_VAL
 	ldr	r2, =CLK_SRC_LEFTBUS_OFFSET
 	str	r1, [r0, r2]
 
-	ldr r2, =CLK_MUX_STAT_LEFTBUS_OFFSET
-	ldr r3, =0x00000021
-	bl wait_mux_state
+	/* wait ?us */
+	mov	r1, #0x10000
+4:	subs	r1, r1, #1
+	bne	4b
 
 	ldr	r1, =CLK_DIV_LEFRBUS_VAL
 	ldr	r2, =CLK_DIV_LEFTBUS_OFFSET
 	str	r1, [r0, r2]
 
 @ CMU_RIGHTBUS MUX / DIV
-	ldr	r1, =0x10
+	ldr	r1, =CLK_SRC_RIGHTBUS_VAL
 	ldr	r2, =CLK_SRC_RIGHTBUS_OFFSET
 	str	r1, [r0, r2]
 
-	ldr r2, =CLK_MUX_STAT_RIGHTBUS_OFFSET
-	ldr r3, =0x00000021
-	bl wait_mux_state
+	/* wait ?us */
+	mov	r1, #0x10000
+5:	subs	r1, r1, #1
+	bne	5b
 
 	ldr	r1, =CLK_DIV_RIGHTBUS_VAL
 	ldr	r2, =CLK_DIV_RIGHTBUS_OFFSET
@@ -182,54 +163,28 @@ skip_mpll:
 	ldr     r2, =VPLL_CON0_OFFSET
 	str     r1, [r0, r2]
 
-	ldr r2, =APLL_CON0_OFFSET
-	bl wait_pll_lock
-	ldr r2, =MPLL_CON0_OFFSET
-	bl wait_pll_lock
-	ldr r2, =EPLL_CON0_OFFSET
-	bl wait_pll_lock
-	ldr r2, =VPLL_CON0_OFFSET
-	bl wait_pll_lock
+	/* wait ?us */
+	mov	r1, #0x40000
+6:	subs	r1, r1, #1
+	bne	6b
 
 	ldr	r1, =0x01000001
 	ldr	r2, =CLK_SRC_CPU_OFFSET
 	str	r1, [r0, r2]
-
-	ldr r2, =CLK_MUX_STAT_CPU_OFFSET
-	ldr r3, =0x02110002
-	bl wait_mux_state
-
 	ldr	r1, =0x00011000
 	ldr	r2, =CLK_SRC_DMC_OFFSET
 	str	r1, [r0, r2]
-
-	ldr r2, =CLK_MUX_STAT_DMC_OFFSET
-	ldr r3, =0x11102111
-	bl wait_mux_state
-
 	ldr	r1, =0x00000110
 	ldr	r2, =CLK_SRC_TOP0_OFFSET
 	str	r1, [r0, r2]
-
-	ldr r2, =CLK_MUX_STAT_TOP_OFFSET
-	ldr r3, =0x11111221
-	bl wait_mux_state
-
-	/* skip MUX_ACLK_200_SUB_SEL, MUX_ACLK_400_MCUISP_SUB_SEL setting for CMU_SYSCLK_ISP function */
-	ldr	r1, =0x00011000
+	ldr	r1, =0x01111000
 	ldr	r2, =CLK_SRC_TOP1_OFFSET
 	str	r1, [r0, r2]
 
-	ldr r2, =CLK_MUX_STAT_TOP1_OFFSET
-	ldr r3, =0x01122110
-	bl wait_mux_state
-
-	ldr	r0, =CHIP_ID_BASE
-	ldr	r1, [r0]
-	lsr	r1, r1, #8
-	and	r1, r1, #3
-	cmp	r1, #2
-	bne	v310_2
+	/* wait ?us */
+	mov	r1, #0x10000
+7:	subs	r1, r1, #1
+	bne	7b
 
 	/* check C2C_CTRL enable bit */
 	ldr r3, =S5PV310_POWER_BASE
@@ -254,7 +209,10 @@ skip_mpll:
 	ldr	r2, =DMC_PHYCONTROL0
 	str	r1, [r0, r2]
 
-	bl wait_phy_state
+	/* wait ?us */
+	mov	r1, #0x20000
+8:	subs	r1, r1, #1
+	bne	8b
 
 	ldr	r1, =0x0000008C
 	ldr	r2, =DMC_PHYCONTROL1
@@ -263,7 +221,10 @@ skip_mpll:
 	ldr	r2, =DMC_PHYCONTROL1
 	str	r1, [r0, r2]
 
-	bl wait_phy_state
+	/* wait ?us */
+	mov	r1, #0x20000
+9:	subs	r1, r1, #1
+	bne	9b
 
 	ldr	r0, =APB_DMC_1_BASE
 
@@ -279,7 +240,10 @@ skip_mpll:
 	ldr	r2, =DMC_PHYCONTROL0
 	str	r1, [r0, r2]
 
-	bl wait_phy_state
+	/* wait ?us */
+	mov	r1, #0x20000
+10:	subs	r1, r1, #1
+	bne	10b
 
 	ldr	r1, =0x0000008C
 	ldr	r2, =DMC_PHYCONTROL1
@@ -287,8 +251,11 @@ skip_mpll:
 	ldr	r1, =0x00000084
 	ldr	r2, =DMC_PHYCONTROL1
 	str	r1, [r0, r2]
-
-	bl wait_phy_state
+	
+	/* wait ?us */
+	mov	r1, #0x20000
+11:	subs	r1, r1, #1
+	bne	11b
 #endif
 
 	ldr	r0, =APB_DMC_0_BASE

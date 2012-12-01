@@ -19,11 +19,7 @@
 
 /* partition information */
 #if defined(CONFIG_SECURE_BOOT) || defined(CONFIG_SECURE_BL1_ONLY)
-#if (defined(CONFIG_CPU_EXYNOS5250_EVT1) || defined(CONFIG_CPU_EXYNOS4X12)) && defined(CONFIG_TRUSTZONE) && defined(CONFIG_BL1_MONITOR)
-#define PART_SIZE_FWBL1		(15 * 1024)
-#else
 #define PART_SIZE_FWBL1		(8 * 1024)
-#endif
 #else
 #define PART_SIZE_FWBL1		0
 #endif
@@ -33,16 +29,9 @@
 #else
 #define PART_SIZE_UBOOT		(512 * 1024)
 #endif
-#define PART_SIZE_KERNEL	(4 * 1024 * 1024)
-#define PART_SIZE_ROOTFS	(26 * 1024 * 1024)
-
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-#define PART_SIZE_TZSW		(156 * 1024)
-#elif defined(CONFIG_EXYNOS4412) || defined(CONFIG_EXYNOS4212)
-#define PART_SIZE_TZSW		(156 * 1024)
-#else
+#define PART_SIZE_KERNEL	(8 * 1024 * 1024)
+#define PART_SIZE_ROOTFS	(16 * 1024 * 1024)
 #define PART_SIZE_TZSW		(160 * 1024)
-#endif
 
 #define MOVI_FWBL1_BLKCNT	(PART_SIZE_FWBL1 / MOVI_BLKSIZE)
 #define MOVI_BL1_BLKCNT		(PART_SIZE_BL1 / MOVI_BLKSIZE)
@@ -53,8 +42,6 @@
 #define MOVI_TZSW_BLKCNT	(PART_SIZE_TZSW / MOVI_BLKSIZE)		/* 160KB */
 
 #define MOVI_UBOOT_POS		((eFUSE_SIZE / MOVI_BLKSIZE) + MOVI_FWBL1_BLKCNT + MOVI_BL1_BLKCNT)
-#define MOVI_TZSW_POS           ((eFUSE_SIZE / MOVI_BLKSIZE) + MOVI_FWBL1_BLKCNT \
-                                  + MOVI_BL1_BLKCNT + MOVI_UBOOT_BLKCNT)
 
 /*
  *

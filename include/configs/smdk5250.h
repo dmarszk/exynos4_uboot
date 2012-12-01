@@ -32,67 +32,28 @@
  * High Level Configuration Options
  * (easy to change)
  */
-#define CONFIG_ARMV7	        	1	/* This is an ARM V7 CPU core */
-#define CONFIG_SAMSUNG	        	1	/* in a SAMSUNG core */
-#define CONFIG_S5P	        	1	/* which is in a S5P Family */
-#define CONFIG_ARCH_EXYNOS              1       /* which is in a Exynos Family */
-#define CONFIG_ARCH_EXYNOS5             1       /* which is in a Exynos5 Family */
-#define CONFIG_CPU_EXYNOS5250           1       /* which is in a Exynos5250 */
-#define CONFIG_MACH_SMDK5250            1       /* which is in a SMDK5250 */
-#define CONFIG_CPU_EXYNOS5250_EVT1      1       /* which is in a Exynos5250 EVT1 */
-
-#define CONFIG_TRUSTZONE
-#define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
-#ifdef CONFIG_TRUSTZONE
-#define CONFIG_BL1_MONITOR
-#define CONFIG_BOOTLOADER_MONITOR        1
-#define CONFIG_PHY_IRAM_BASE            (0x02020000)
-#define CONFIG_PHY_IRAM_NS_BASE         (CONFIG_PHY_IRAM_BASE + 0x2F000)
-#endif
+#define CONFIG_ARMV7		1	/* This is an ARM V7 CPU core */
+#define CONFIG_SAMSUNG		1	/* in a SAMSUNG core */
+#define CONFIG_S5P		1	/* which is in a S5P Family */
+#define CONFIG_ARCH_EXYNOS      1       /* which is in a Exynos Family */
+#define CONFIG_ARCH_EXYNOS5     1       /* which is in a Exynos5 Family */
+#define CONFIG_CPU_EXYNOS5250   1       /* which is in a Exynos5250 */
+#define CONFIG_MACH_SMDK5250    1       /* which is in a SMDK5250 */
+#define CONFIG_EVT1		1	/* EVT1 */
+//#define CONFIG_CORTEXA5_ENABLE  1       /* enable coretex-A5(IOP) Booting */
 
 #define CONFIG_SECURE_BL1_ONLY
-//#define CONFIG_SECURE_TZSW_ONLY
 //#define CONFIG_SECURE_BOOT
 #ifdef CONFIG_SECURE_BOOT
+#define CONFIG_S5PC210S
 #define CONFIG_SECURE_ROOTFS
 #define CONFIG_SECURE_KERNEL_BASE	0xc0008000
-#define CONFIG_SECURE_KERNEL_SIZE	0x400000
+#define CONFIG_SECURE_KERNEL_SIZE	0x200000
 #define CONFIG_SECURE_ROOTFS_BASE	0xc1000000
-#define CONFIG_SECURE_ROOTFS_SIZE	0x100000
+#define CONFIG_SECURE_ROOTFS_SIZE	0x5c2000
 #endif
 
 //#include <asm/arch/cpu.h>		/* get chip and board defs */
-
-/* APLL : 600MHz */
-//#define CONFIG_CLK_ARM_600_APLL_600
-/* APLL : 800MHz */
-//#define CONFIG_CLK_ARM_800_APLL_800
-/* APLL : 1GHz */
-#define CONFIG_CLK_ARM_1000_APLL_1000
-/* APLL : 1.2GHz */
-//#define CONFIG_CLK_ARM_1200_APLL_1200
-/* APLL : 1.4GHz */
-//#define CONFIG_CLK_ARM_1400_APLL_1400
-
-/* LPDDR support */
-//#define CONFIG_DDR3
-//#define CONFIG_LPDDR2
-#define CONFIG_LPDDR3
-
-/* MCLK_CDREX */
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-#define MCLK_CDREX_800  	1
-#else
-#ifdef CONFIG_DDR3
-#define MCLK_CDREX_800  	1
-#else
-//#define MCLK_CDREX_800	1
-//#define MCLK_CDREX_667  	1
-#define MCLK_CDREX_533  	1
-//#define MCLK_CDREX_400	1
-#endif
-#endif
-
 
 /* (Memory Interleaving Size = 1 << IV_SIZE) */
 #define CONFIG_IV_SIZE 0x07
@@ -117,53 +78,13 @@
 #define CONFIG_CMDLINE_EDITING
 
 /* Power Management is enabled */
-#define CONFIG_PM
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-/* For POP TYPE */
-#define CONFIG_PM_VDD_ARM       	1200
-#define CONFIG_PM_VDD_INT	        1000
-#define CONFIG_PM_VDD_G3D	        1200
-#define CONFIG_PM_VDD_MIF	        1100
-#define CONFIG_PM_VDD_MEM               1250
-#define CONFIG_PM_VDDQ_M1_M2	        1250
-/* For SCP TYPE */
-#if defined(CONFIG_LPDDR3)
-#define CONFIG_SCP_PM_VDD_ARM	        1200
-#define CONFIG_SCP_PM_VDD_INT	        1000
-#define CONFIG_SCP_PM_VDD_G3D	        1200
-#define CONFIG_SCP_PM_VDD_MIF	        1100
-#define CONFIG_SCP_PM_VDD_MEM           1250
-#define CONFIG_SCP_PM_VDDQ_M1_M2	1250
-#else
-#define CONFIG_SCP_PM_VDD_ARM	        1200
-#define CONFIG_SCP_PM_VDD_INT	        1000
-#define CONFIG_SCP_PM_VDD_G3D	        1200
-#define CONFIG_SCP_PM_VDD_MIF	        1100
-#define CONFIG_SCP_PM_VDDQ_M1_M2	1350
-#endif /* CONFIG_LPDDR3 */
-#else
-#if defined(CONFIG_DDR3)
-#define CONFIG_PM_VDD_ARM	        1300
-#define CONFIG_PM_VDD_INT	        1150
-#define CONFIG_PM_VDD_G3D	        1100
-#define CONFIG_PM_VDD_MIF	        1200
-#define CONFIG_PM_VDDQ_M1_M2	        1500
-#else
-#if defined(CONFIG_CLK_ARM_600_APLL_600) || defined(CONFIG_CLK_ARM_800_APLL_800)
-#define CONFIG_PM_VDD_ARM	        1000
-#elif defined(CONFIG_CLK_ARM_1000_APLL_1000)
-#define CONFIG_PM_VDD_ARM	        1050
-#elif defined(CONFIG_CLK_ARM_1200_APLL_1200)
-#define CONFIG_PM_VDD_ARM	        1150
-#elif defined(CONFIG_CLK_ARM_1400_APLL_1400)
-#define CONFIG_PM_VDD_ARM	        1250
-#endif
-#define CONFIG_PM_VDD_INT	        1150
-#define CONFIG_PM_VDD_G3D	        1000
-#define CONFIG_PM_VDD_MIF	        1000
-#endif
-#define CONFIG_PM_VDD_APLL	        1150
-#endif /* CONFIG_CPU_EXYNOS5250_EVT1 */
+//#define CONFIG_PM
+//#define CONFIG_INVERSE_PMIC_I2C 1
+#define CONFIG_PM_VDD_ARM	1.1
+#define CONFIG_PM_VDD_INT	1.0
+#define CONFIG_PM_VDD_G3D	1.1
+#define CONFIG_PM_VDD_MIF	1.1
+#define CONFIG_PM_VDD_LDO14	1.8
 
 /*
  * Size of malloc() pool
@@ -174,17 +95,13 @@
 /*
  * select serial console configuration
  */
-#define CONFIG_SERIAL2			1
+#define CONFIG_SERIAL1			1
 #define CONFIG_SERIAL_MULTI		1
 
 #define CONFIG_USB_OHCI
 #undef CONFIG_USB_STORAGE
+//#define CONFIG_S3C_USBD
 #define CONFIG_EXYNOS_USBD3
-#undef CONFIG_USB_CPUMODE
-
-#ifndef CONFIG_EXYNOS_USBD3
-#define CONFIG_S3C_USBD
-#endif
 
 #define USBD_DOWN_ADDR		0xc0000000
 
@@ -232,18 +149,11 @@
 /*
  * If you want MSHC at MMC CH4.
  */
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-#define CONFIG_S5P_MSHC
-#define MMC_MAX_CHANNEL		4
 
-#define USE_MMC0
-#define USE_MMC2
-#else
 #define MMC_MAX_CHANNEL		5
 
 #define USE_MMC2
 #define USE_MMC4
-#endif
 
 /*
  * BOOTP options
@@ -260,9 +170,6 @@
 #define CONFIG_GATEWAYIP	192.168.0.1
 
 #define CONFIG_BOOTDELAY	3
-
-#define CONFIG_FACTORY_RESET_MODE       0xf
-
 /* Default boot commands for Android booting. */
 #define CONFIG_BOOTCOMMAND	"movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000"
 #define CONFIG_BOOTARGS	""
@@ -283,16 +190,6 @@
 		"mmc read 1 48000000 160000 a0000;"					\
 		"fastboot flash cache 48000000;"					\
 		"reset"
-
-#define CONFIG_FACTORY_RESET_BOOTCOMMAND        \
-                "ext3format mmc 0:3;ext3format mmc 0:4;"		\
-                "movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000"
-
-#define CONFIG_ROOTFS_ATAGS
-#ifdef CONFIG_ROOTFS_ATAGS
-#define CONFIG_EXTRA_ENV_SETTINGS                                       \
-                "rootfslen= 100000"
-#endif
 
 /*
  * Miscellaneous configurable options
@@ -322,8 +219,8 @@
  */
 #define CONFIG_STACKSIZE	(256 << 10)	/* 256 KiB */
 
-#define CONFIG_NR_DRAM_BANKS	8
-#define SDRAM_BANK_SIZE         (unsigned long)0x10000000    /* 256 MB */
+#define CONFIG_NR_DRAM_BANKS	4
+#define SDRAM_BANK_SIZE         0x10000000    /* 256 MB */
 #define PHYS_SDRAM_1            CONFIG_SYS_SDRAM_BASE /* SDRAM Bank #1 */
 #define PHYS_SDRAM_1_SIZE       SDRAM_BANK_SIZE
 #define PHYS_SDRAM_2            (CONFIG_SYS_SDRAM_BASE + SDRAM_BANK_SIZE) /* SDRAM Bank #2 */
@@ -369,9 +266,9 @@
 */
 /* Fastboot variables */
 #define CFG_FASTBOOT_TRANSFER_BUFFER            (0x48000000)
-#define CFG_FASTBOOT_TRANSFER_BUFFER_SIZE       (0x30000000)   /* 768MB */
+#define CFG_FASTBOOT_TRANSFER_BUFFER_SIZE       (0x10000000)   /* 256MB */
 #define CFG_FASTBOOT_ADDR_KERNEL                (0x40008000)
-#define CFG_FASTBOOT_ADDR_RAMDISK               (0x41000000)
+#define CFG_FASTBOOT_ADDR_RAMDISK               (0x40800000)
 #define CFG_FASTBOOT_PAGESIZE                   (2048)  // Page size of booting device
 #define CFG_FASTBOOT_SDMMC_BLOCKSIZE            (512)   // Block size of sdmmc
 #define CFG_PARTITION_START			(0x4000000)
@@ -389,7 +286,7 @@
  * machine type
  */
 
-#define MACH_TYPE       		3825	/* SMDK5250 machine ID */
+#define MACH_TYPE       		3774	/* SMDKC210 machine ID */
 
 #define CONFIG_ENV_OFFSET		0x0007C000
 
@@ -403,18 +300,6 @@
 #define BOOT_SEC_DEV		0x5
 #define BOOT_EMMC		0x6
 #define BOOT_EMMC_4_4		0x7
-#define BOOT_USB                0x100
-
-/*
- *  Boot device
- */
-#define SDMMC_CH2               0x0
-#define SDMMC_CH0               0x4
-#define EMMC                    0x14
-#define SATA                    0x18
-#define SPI_SF                  0x28
-#define SFMC                    0x34
-#define USB                     0x40
 
 #define CONFIG_ZIMAGE_BOOT
 
@@ -423,7 +308,8 @@
 
 #define CONFIG_DOS_PARTITION		1
 
-#define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_PHY_UBOOT_BASE - 0x1000000)
+//#define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_SYS_LOAD_ADDR - 0x1000000)
+#define CONFIG_SYS_INIT_SP_ADDR	(0x43e00000 - 0x1000000)
 
 /*
  * Ethernet Contoller driver

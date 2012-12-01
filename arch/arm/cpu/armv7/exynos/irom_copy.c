@@ -24,12 +24,17 @@ typedef u32 (*copy_sd_mmc_to_mem) \
 	(u32 start_block, u32 block_count, u32* dest_addr);
 
 #define ISRAM_ADDRESS	0x02020000
+#ifdef CONFIG_EVT1
 #define SECURE_CONTEXT_BASE 0x02023000
 #define EXTERNAL_FUNC_ADDRESS	(ISRAM_ADDRESS + 0x0030)
 #define EXT_eMMC43_BL2_ByCPU_ADDRESS	(EXTERNAL_FUNC_ADDRESS + 0x4)
 #define MSH_ReadFromFIFO_eMMC_ADDRESS	(EXTERNAL_FUNC_ADDRESS + 0x14)
 #define MSH_EndBootOp_eMMC_ADDRESS	(EXTERNAL_FUNC_ADDRESS + 0x18)
-#define LoadImageFromUsb_ADDRESS	(EXTERNAL_FUNC_ADDRESS + 0x40)
+#else
+#define SECURE_CONTEXT_BASE 0x02023800
+#define EXTERNAL_FUNC_ADDRESS	(ISRAM_ADDRESS + 0x6000 - 0x40)
+#define EXT_eMMC43_BL2_ByCPU_ADDRESS	(EXTERNAL_FUNC_ADDRESS + 0x18)
+#endif
 
 #define SDMMC_ReadBlocks_eMMC_ByCPU(uNumOfBlks, uDstAddr)	\
 	(((void(*)(u32, u32*))(*((u32 *)EXT_eMMC43_BL2_ByCPU_ADDRESS)))(uNumOfBlks, uDstAddr))
@@ -37,15 +42,14 @@ typedef u32 (*copy_sd_mmc_to_mem) \
 #define SDMMC_ReadBlocks(uStartBlk, uNumOfBlks, uDstAddr)	\
 	(((void(*)(u32, u32, u32*))(*((u32 *)EXTERNAL_FUNC_ADDRESS)))(uStartBlk, uNumOfBlks, uDstAddr))
 
-#define LoadImageFromUsb()	\
-	(((void(*)())(*((u32 *)LoadImageFromUsb_ADDRESS)))())
-
 #if defined (CONFIG_EXYNOS4212) || defined (CONFIG_ARCH_EXYNOS5)
 typedef u32(*MSH_ReadFromFIFO_eMMC)
 (u32 uNumOfBlks, u32 *uDstAddr);
 #else
+	#ifdef CONFIG_EVT1
 typedef u32(*MSH_ReadFromFIFO_eMMC)
 (u32 RxWaterMark,u32 uNumOfBlks, u32 *uDstAddr);
+	#endif
 #endif
 typedef u32(*MSH_EndBootOp_eMMC)
 (void);
@@ -64,10 +68,16 @@ void * uboot_memcpy(void * dest,const void *src,size_t count)
 
 void movi_uboot_copy(void)
 {
+#ifdef CONFIG_EVT1
 #ifdef CONFIG_CORTEXA5_ENABLE
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, 0x40000000);
 #endif
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
+#else
+	copy_sd_mmc_to_mem copy_uboot = (copy_sd_mmc_to_mem)(0x00002488);
+
+	copy_uboot(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
+#endif
 
 #ifdef CONFIG_SECURE_BOOT
 	if(Check_Signature( (SB20_CONTEXT *)SECURE_CONTEXT_BASE, (unsigned char*)CONFIG_PHY_UBOOT_BASE, 
@@ -77,16 +87,12 @@ void movi_uboot_copy(void)
 #endif
 }
 
-void usb_device_copy(void)
-{
-	LoadImageFromUsb();
-}
-
 void emmc_uboot_copy(void)
 {
 	SDMMC_ReadBlocks_eMMC_ByCPU(MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
 }
 
+#ifdef CONFIG_EVT1
 void emmc_4_4_uboot_copy(void)
 {
 	MSH_ReadFromFIFO_eMMC bl2_copy =
@@ -99,16 +105,7 @@ void emmc_4_4_uboot_copy(void)
 #endif
 #else
 	bl2_copy(0x10, MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
-
 #endif
-
-#ifdef CONFIG_SECURE_BOOT
-	if(Check_Signature( (SB20_CONTEXT *)SECURE_CONTEXT_BASE, (unsigned char*)CONFIG_PHY_UBOOT_BASE,
-			PART_SIZE_UBOOT-256, (unsigned char*)(CONFIG_PHY_UBOOT_BASE+PART_SIZE_UBOOT-256), 256 ) != 0) {
-		while(1);
-	}
-#endif
-
 }
 
 void emmc_4_4_endbootOp_eMMC(void)
@@ -118,6 +115,7 @@ void emmc_4_4_endbootOp_eMMC(void)
 
 	bl2_copy();
 }
+#endif
 
 void movi_write_env(ulong addr)
 {

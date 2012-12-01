@@ -13,6 +13,8 @@
 #include <common.h>
 #include <asm/arch/cpu.h>
 
+#undef SW_RST_REG
+#define SW_RST_REG			__REG(0x10020400)
 /* * reset the cpu by setting up the watchdog timer and let him time out */
 void reset_cpu(ulong ignored)
 {

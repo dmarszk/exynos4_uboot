@@ -78,12 +78,12 @@
 #define CONFIG_CMDLINE_EDITING
 
 /* Power Management is enabled */
-#define CONFIG_PM
+//#define CONFIG_PM
 //#define CONFIG_INVERSE_PMIC_I2C 1
-#define CONFIG_PM_VDD_ARM	1.25
-#define CONFIG_PM_VDD_INT	1.1
+#define CONFIG_PM_VDD_ARM	1.1
+#define CONFIG_PM_VDD_INT	1.0
 #define CONFIG_PM_VDD_G3D	1.1
-#define CONFIG_PM_VDD_MIF	1.2
+#define CONFIG_PM_VDD_MIF	1.1
 #define CONFIG_PM_VDD_LDO14	1.8
 
 /*

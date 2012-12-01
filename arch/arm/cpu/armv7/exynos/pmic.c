@@ -579,10 +579,6 @@ void I2C_MAX8997_VolSetting(PMIC_RegNum eRegNum, u8 ucVolLevel, u8 ucEnable)
 	{
 		reg_addr = 0x48;
 	}
-	else if(eRegNum == 5)
-	{
-		reg_addr = 0x44;
-	}
 	else
 		while(1);
 
@@ -624,12 +620,6 @@ void I2C_MAX8997_EnableReg(PMIC_RegNum eRegNum, u8 ucEnable)
 		reg_addr = 0x48;
 		reg_bitpos = 0x6;
 	}
-	else if(eRegNum == 5)
-	{
-		reg_addr = 0x44;
-		reg_bitpos = 0x6;
-	}
-
 	else
 		while(1);
 
@@ -644,24 +634,17 @@ void pmic_init(void)
 {
 	float vdd_arm, vdd_int, vdd_g3d;
 
-#if defined(CONFIG_SMDKC220) || defined(CONFIG_ARCH_EXYNOS5)
+#if defined(CONFIG_SMDKC220) || defined(CONFIG_CPU_EXYNOS5210)
 	float vdd_mif;
 	float vdd_ldo14;
-#if defined(CONFIG_PM_VDD_LDO10)
-	float vdd_ldo10;
 #endif
-#endif
-
 	u8 read_data;
 
 	vdd_arm = CONFIG_PM_VDD_ARM;
 	vdd_int = CONFIG_PM_VDD_INT;
 	vdd_g3d = CONFIG_PM_VDD_G3D;
-#if defined(CONFIG_SMDKC220) || defined(CONFIG_ARCH_EXYNOS5)
+#if defined(CONFIG_SMDKC220) || defined(CONFIG_CPU_EXYNOS5210)
 	vdd_mif = CONFIG_PM_VDD_MIF;
-#if defined(CONFIG_PM_VDD_LDO10)
-	vdd_ldo10 = CONFIG_PM_VDD_LDO10;
-#endif
 	vdd_ldo14 = CONFIG_PM_VDD_LDO14;
 #endif
 	IIC0_ESetport();
@@ -671,30 +654,28 @@ void pmic_init(void)
 #endif
 	/* read ID */
 	IIC0_ERead(MAX8997_ADDR, 0, &read_data);
-	if (read_data == 0x77) {
+	if(read_data == 0x77)
+	{
+#ifndef CONFIG_CPU_EXYNOS5210
 		I2C_MAX8997_VolSetting(PMIC_BUCK1, CALC_MAXIM_BUCK1245_VOLT(vdd_arm * 1000), 1);
 		I2C_MAX8997_VolSetting(PMIC_BUCK2, CALC_MAXIM_BUCK1245_VOLT(vdd_int * 1000), 1);
 		I2C_MAX8997_VolSetting(PMIC_BUCK3, CALC_MAXIM_BUCK37_VOLT(vdd_g3d * 1000), 1);
-#if defined(CONFIG_ARCH_EXYNOS5)
-		I2C_MAX8997_VolSetting(PMIC_BUCK4, CALC_MAXIM_BUCK1245_VOLT(vdd_mif * 1000), 1);
-#if defined(CONFIG_PM_VDD_LDO10)
-		I2C_MAX8997_VolSetting(PMIC_LDO10, CALC_MAXIM_ALL_LDO(vdd_ldo10 * 1000), 3);
+		//I2C_MAX8997_VolSetting(PMIC_BUCK4, CALC_MAXIM_BUCK1245_VOLT(vdd_mif * 1000), 1);
 #endif
-#endif
-
 #if defined(CONFIG_SMDKC220) || defined(CONFIG_CPU_EXYNOS5210)
 		/* LDO14 config */
 		I2C_MAX8997_VolSetting(PMIC_LDO14, CALC_MAXIM_ALL_LDO(vdd_ldo14 * 1000), 3);
 #endif
-	} else {
-#if !defined(CONFIG_ARCH_EXYNOS5)
+		IIC0_EWrite(MAX8997_ADDR, 0x14, 0x00); // manual reset debounce timer 2sec...
+	}
+	else
+	{
 		/* VDD_ARM, mode 3 register */
 		IIC0_EWrite(MAX8952_ADDR, 0x03, 0x80 | (((unsigned char)(vdd_arm * 100))-77));
 		/* VDD_INT, mode 2 register */
 		IIC1_EWrite(MAX8649_ADDR, 0x02, 0x80 | (((unsigned char)(vdd_int * 100))-75));
 		/* VDD_G3D, mode 2 register */
 		IIC0_EWrite(MAX8649A_ADDR, 0x02, 0x80 | (((unsigned char)(vdd_g3d * 100))-75));
-#endif
 	}
 
 #ifdef CONFIG_SMDKC220

@@ -57,10 +57,6 @@ struct mshci_host mshc_host[MMC_MAX_CHANNEL];
 static struct mshci_idmac idmac_desc[0x10000]; /* it can cover to transfer 256MB at a time */
 static int first_init=0;
 
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-extern unsigned int OmPin;
-#endif
-
 static void mshci_dumpregs_err(struct mshci_host *host)
 {
 	dbg( "mshci: ============== REGISTER DUMP ==============\n");
@@ -135,7 +131,7 @@ static void mshci_dumpregs_err(struct mshci_host *host)
 	dbg( "mshci: MSHCI_CLOCKCON:  0x%08x\n",
 		mshci_readl(host, MSHCI_CLOCKCON));
 	dbg( "mshci: MSHCI_FIFODAT:   0x%08x\n",
-		mshci_readl(host, MSHCI_FIFODAT(host->data_offset)));
+		mshci_readl(host, MSHCI_FIFODAT));
 	dbg( "mshci: ===========================================\n");
 }
 
@@ -487,11 +483,7 @@ static void mshci_clock_onoff(struct mshci_host *host, int val)
 }
 
 #if defined(CONFIG_S5PC210) || defined(CONFIG_ARCH_EXYNOS)
-	#if defined(CONFIG_EXYNOS4412_EVT1) || defined(CONFIG_CPU_EXYNOS5250_EVT1)
-#define MAX_EMMC_CLOCK	(52000000) /* max clock 50Mhz */
-	#else
 #define MAX_EMMC_CLOCK	(40000000) /* max clock 40Mhz */
-	#endif
 #else
 #define MAX_EMMC_CLOCK	(52000000) /* max clock 52Mhz */
 #endif
@@ -503,7 +495,7 @@ static void mshci_change_clock(struct mshci_host *host, uint clock)
 	u32 div_mmc, div_mmc_pre, sclk_mmc;
 	volatile u32 loop_count;
 
-	if (clock == 0) {
+	if (clock == host->clock) {
 		return;
 	}
 
@@ -518,30 +510,11 @@ static void mshci_change_clock(struct mshci_host *host, uint clock)
 		dbg("Set CLK to %dMHz\n", clock/1000000);
 	}
 #if defined(CONFIG_S5PC210) || defined(CONFIG_ARCH_EXYNOS)
-#if defined(USE_MMC4)
 	/* Calculate SCLK_MMC4 */
 	div_mmc = (CLK_DIV_FSYS3 & (0x0000000f)) + 1;
 	div_mmc_pre = ((CLK_DIV_FSYS3 & (0x0000ff00))>>8) + 1;
 	mpll_clock = 800000000; //get_MPLL_CLK();
 	sclk_mmc = (mpll_clock/div_mmc)/div_mmc_pre;
-#elif defined(USE_MMC0) && defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	/* Calculate SCLK_MMC0 */
-	if (host->ioaddr == (void *)ELFIN_HSMMC_0_BASE ) {
-		div_mmc = (CLK_DIV_FSYS1 & (0x0000000f)) + 1;
-		div_mmc_pre = ((CLK_DIV_FSYS1 & (0x0000ff00))>>8) + 1;
-		mpll_clock = 800000000; //get_MPLL_CLK();
-		sclk_mmc = (mpll_clock/div_mmc)/div_mmc_pre;
-	}
-#endif
-#if defined(USE_MMC2) && defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	/* Calculate SCLK_MMC2 */
-	if (host->ioaddr == (void *)ELFIN_HSMMC_2_BASE ) {
-		div_mmc = (CLK_DIV_FSYS2 & (0x0000000f)) + 1;
-		div_mmc_pre = ((CLK_DIV_FSYS2 & (0x0000ff00))>>8) + 1;
-		mpll_clock = 800000000; //get_MPLL_CLK();
-		sclk_mmc = (mpll_clock/div_mmc)/div_mmc_pre;
-	}
-#endif
 #else
 	/* For 6450 */
 	/* This code will be move to machine directory after test */
@@ -552,30 +525,18 @@ static void mshci_change_clock(struct mshci_host *host, uint clock)
 #endif
 	dbg("mpll_clock: %dMHz\n", mpll_clock/1000000);
 	dbg("sclk_mmc: %dKHz\n", sclk_mmc/1000);
-#if defined(CONFIG_EXYNOS4412_EVT1) || defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	dbg("Phase Shift CLK: %dKHz\n", (sclk_mmc/4)/1000);
-#else
 	dbg("Phase Shift CLK: %dKHz\n", (sclk_mmc/2)/1000);
-#endif
 
 	/* CLKDIV */
 	for (div=1 ; div <= 0xFF; div++)
 	{
-#if defined(CONFIG_EXYNOS4412_EVT1) || defined(CONFIG_CPU_EXYNOS5250_EVT1)
-		if (((sclk_mmc / 4) /(2*div)) <= clock) {
-#else
 		if (((sclk_mmc / 2) /(2*div)) <= clock) {
-#endif
 			mshci_writel(host, div, MSHCI_CLKDIV);
 			break;
  		}
  	}
 	dbg("div: %08d\n", div);
-#if defined(CONFIG_EXYNOS4412_EVT1) || defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	dbg("CLOCK:: %dKHz\n", ((sclk_mmc/4)/(div*2))/1000);
-#else
 	dbg("CLOCK:: %dKHz\n", ((sclk_mmc/2)/(div*2))/1000);
-#endif
  
 	mshci_writel(host, div, MSHCI_CLKDIV);
 
@@ -608,24 +569,11 @@ static void mshci_change_clock(struct mshci_host *host, uint clock)
 static void s5p_mshc_set_ios(struct mmc *mmc)
 {
 	struct mshci_host *host = mmc->priv;
-	u32 mode, ddr= 0, sdr = 0;
-	u8 read_id;
+	u32 mode, ddr, sdr;
 
-#if defined(CONFIG_EXYNOS4212)
-	sdr = 0x00010001;
-	ddr = 0x00010001;
-#elif defined(CONFIG_ARCH_EXYNOS5)
-	sdr = 0x00010000;
-	ddr = 0x00010000;
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	if (host->ioaddr == (void *)ELFIN_HSMMC_0_BASE ) {
-		sdr = 0x03030002;
-		ddr = 0x03020001;
-	} else if (host->ioaddr == (void *)ELFIN_HSMMC_2_BASE ) {
-		sdr = 0x03020001;
-		ddr = 0x03030002;
-	}
-#endif
+#if defined(CONFIG_EXYNOS4212) || defined(CONFIG_ARCH_EXYNOS5)
+	sdr = 0x00020001;
+	ddr = 0x00020001;
 #else
 	sdr = 0x00010000;
 	ddr = 0x00020002;
@@ -672,18 +620,19 @@ static void s5p_mshc_set_ios(struct mmc *mmc)
 
 }
 
-
 static void mshci_fifo_init(struct mshci_host *host)
 {
 	int fifo_val, fifo_depth, fifo_threshold;
 
 	fifo_val = mshci_readl(host, MSHCI_FIFOTH);
-
-	if (host->version == 0x240a)
-		fifo_depth = 0x80;
-	else
-		fifo_depth = 0x20;
-
+/*	
+	fifo_depth = ((fifo_val & RX_WMARK)>>16)+1;
+*/
+#if defined (CONFIG_EXYNOS4212) || defined(CONFIG_ARCH_EXYNOS5)
+	fifo_depth = 0x80;
+#else
+	fifo_depth = 0x20;
+#endif
 	fifo_threshold = fifo_depth/2;
 	
 	dbg("FIFO WMARK FOR RX 0x%x WX 0x%x.\n",
@@ -718,14 +667,7 @@ static int s5c_mshc_init(struct mmc *mmc)
 	int count;
 	u32 ier;
 
-	host->version = GET_VERID(mshci_readl(host, MSHCI_VERID));
-
 	mshci_init(host);
-
-	if (host->version == 0x240a)
-		host->data_offset = MSHCI_240A_FIFODAT;
-	else
-		host->data_offset = MSHCI_220A_FIFODAT;
 
 	mshci_change_clock(host, 400000);
 
@@ -778,11 +720,13 @@ static int s5p_mshc_initialize(int channel)
 	printf("REVISION: %d.%d\n", main_rev, sub_rev);
 	mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT |
 				MMC_MODE_HS_52MHz | MMC_MODE_HS |
+				MMC_MODE_HS_52MHz_DDR_18_3V |
 				MMC_MODE_8BIT_DDR;
 	} else {
 	printf("REVISION: %d.%d\n", main_rev, sub_rev);
-	mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT_DDR |
-				MMC_MODE_HS_52MHz | MMC_MODE_HS;
+	mmc->host_caps = MMC_MODE_4BIT | MMC_MODE_8BIT |
+				MMC_MODE_HS_52MHz | MMC_MODE_HS |
+				MMC_MODE_HS_52MHz_DDR_18_3V;
 	}
 #else
 	/* S5P6450 */
@@ -792,21 +736,11 @@ static int s5p_mshc_initialize(int channel)
 //				MMC_MODE_4BIT_DDR;
 #endif
 	mmc->f_min = 400000;
-	mmc->f_max = 50000000;
+	mmc->f_max = 40000000;
 
 	mshc_host[channel].clock = 0;
 
 	switch(channel) {
-#ifdef USE_MMC0
-	case 0:
-		mshc_host[channel].ioaddr = (void *)ELFIN_HSMMC_0_BASE;
-		break;
-#endif
-#ifdef USE_MMC2
-	case 2:
-		mshc_host[channel].ioaddr = (void *)ELFIN_HSMMC_2_BASE;
-		break;
-#endif
 #ifdef USE_MMC3
 	case 3:	
 		mshc_host[channel].ioaddr = (void *)ELFIN_HSMMC_3_BASE;
@@ -827,34 +761,6 @@ static int s5p_mshc_initialize(int channel)
 int smdk_s5p_mshc_init(void)
 {
 	int err;
-
-#if defined(CONFIG_CPU_EXYNOS5250_EVT1)
-	if (OmPin == BOOT_EMMC_4_4 || OmPin == BOOT_EMMC) {
-#ifdef USE_MMC0
-		err = s5p_mshc_initialize(0);
-		if(err)
-			return err;
-#endif
-
-#ifdef USE_MMC2
-		err = s5p_mshc_initialize(2);
-		if(err)
-			return err;
-#endif
-	} else {
-#ifdef USE_MMC2
-		err = s5p_mshc_initialize(2);
-		if(err)
-			return err;
-#endif
-
-#ifdef USE_MMC0
-		err = s5p_mshc_initialize(0);
-		if(err)
-			return err;
-#endif
-	}
-#endif
 
 #ifdef USE_MMC3
 	err = s5p_mshc_initialize(3);

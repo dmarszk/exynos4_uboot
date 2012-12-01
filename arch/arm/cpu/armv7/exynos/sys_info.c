@@ -54,8 +54,7 @@ int print_cpuinfo(void)
 
 	__asm__ __volatile__("mrc p15, 0, %0, c0, c0, 0":"=r"(cpuid));
 
-	printf("\nCPU: S5PC%x Rev%x.%x [Samsung SOC on SMP Platform Base on ARM CortexA%d]\n"	\
-			, ((PRO_ID >> 12) & 0xfff), PRO_MAINREV, PRO_SUBREV, ((cpuid >> 4) & 0xf));
+	printf("\nCPU: S5PC%x [Samsung SOC on SMP Platform Base on ARM CortexA%d]\n",((PRO_ID >> 12) & 0xfff),((cpuid >> 4) & 0xf));
 
 #elif CONFIG_SMDKC220
 	printf("\nCPU: S5PC220 [Samsung SOC on SMP Platform Base on ARM CortexA9]\n");
@@ -68,12 +67,7 @@ int print_cpuinfo(void)
 	}
 #endif
 
-	printf("APLL = %ldMHz, MPLL = %ldMHz, EPLL = %ldMHz, VPLL = %ldMHz, BPLL = %ldMHz\n", 
-		get_APLL_CLK()/1000000,
-		get_MPLL_CLK()/1000000,
-		get_EPLL_CLK()/1000000,
-		get_VPLL_CLK()/1000000,
-		get_BPLL_CLK()/1000000);
+	printf("APLL = %ldMHz, MPLL = %ldMHz\n", get_APLL_CLK()/1000000, get_MPLL_CLK()/1000000);
 
 	return 0;
 }

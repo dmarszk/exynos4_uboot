@@ -482,10 +482,14 @@ static int write_to_ptn(struct fastboot_ptentry *ptn, unsigned int addr, unsigne
 #endif
 
 #if defined(CFG_FASTBOOT_SDMMCBSP)
+#if defined(CONFIG_HKDK4412)
+static int DEV_NUM = 0;
+#else
 #if defined(CONFIG_S5P6450) && !defined(CONFIG_EMMC_4_4)
 #define	DEV_NUM 1
 #else
 #define	DEV_NUM 0
+#endif
 #endif
 static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, unsigned int size)
 {
@@ -589,7 +593,7 @@ static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, u
 		/* use the partition name that can be understood by a command, movi */
 		if (!strcmp(ptn->name, "bootloader"))
 		{
-			if (INF_REG3_REG == 7){
+			if(INF_REG3_REG == 7 || DEV_NUM){
 				argv[2] = part2;
 				argv[3] = part;
 				argv[4] = dev_num;
@@ -597,7 +601,7 @@ static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, u
 				argc = 6;
 				strncpy(part2, "zero", 7);
 				strncpy(part, "u-boot", 7);
-				sprintf(run_cmd,"emmc open 0");
+				sprintf(run_cmd,"emmc open %d",DEV_NUM);
 				run_command(run_cmd, 0);
 			} 
 			else
@@ -606,14 +610,14 @@ static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, u
 		}
 		else if (!strcmp(ptn->name, "fwbl1"))
 		{
-			if (INF_REG3_REG == 7){
+			if(INF_REG3_REG == 7 || DEV_NUM){
 				argv[2] = part2;
 				argv[3] = ptn->name;
 				argv[4] = dev_num;
 				argv[5] = buffer;
 				argc = 6;
 				strncpy(part2, "zero", 7);
-				sprintf(run_cmd,"emmc open 0");
+				sprintf(run_cmd,"emmc open %d",DEV_NUM);
 				run_command(run_cmd, 0);
 			} 
 			else
@@ -622,14 +626,14 @@ static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, u
 		}
 		else if (!strcmp(ptn->name, "bl2"))
 		{
-			if (INF_REG3_REG == 7){
+			if(INF_REG3_REG == 7 || DEV_NUM){
 				argv[2] = part2;
 				argv[3] = ptn->name;
 				argv[4] = dev_num;
 				argv[5] = buffer;
 				argc = 6;
 				strncpy(part2, "zero", 7);
-				sprintf(run_cmd,"emmc open 0");
+				sprintf(run_cmd,"emmc open %d",DEV_NUM);
 				run_command(run_cmd, 0);
 			} 
 			else
@@ -638,14 +642,14 @@ static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, u
 		}
 		else if (!strcmp(ptn->name, "tzsw"))
 		{
-			if (INF_REG3_REG == 7){
+			if(INF_REG3_REG == 7 || DEV_NUM){
 				argv[2] = part2;
 				argv[3] = ptn->name;
 				argv[4] = dev_num;
 				argv[5] = buffer;
 				argc = 6;
 				strncpy(part2, "zero", 7);
-				sprintf(run_cmd,"emmc open 0");
+				sprintf(run_cmd,"emmc open %d",DEV_NUM);
 				run_command(run_cmd, 0);
 			} 
 			else
@@ -654,34 +658,32 @@ static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, u
 		}
 		else if (!strcmp(ptn->name, "ramdisk"))
 		{
-			strncpy(part, "rootfs", 7);
-			argv[5] = length;
-			sprintf(length, "0x%x",
-				((size + CFG_FASTBOOT_SDMMC_BLOCKSIZE - 1)
-				/ CFG_FASTBOOT_SDMMC_BLOCKSIZE ) * CFG_FASTBOOT_SDMMC_BLOCKSIZE);
-
-#ifdef CONFIG_ROOTFS_ATAGS
-			char ramdisk_size[32];
-			sprintf (ramdisk_size, "0x%x", size);
-			setenv("rootfslen",ramdisk_size);
-			saveenv();
-#endif
-
-			argc++;
+			if(!DEV_NUM) {
+				strncpy(part, "rootfs", 7);
+				argv[5] = length;
+				sprintf(length, "0x%x",
+					((size + CFG_FASTBOOT_SDMMC_BLOCKSIZE - 1)
+					/ CFG_FASTBOOT_SDMMC_BLOCKSIZE ) * CFG_FASTBOOT_SDMMC_BLOCKSIZE);
+				argc++;
+			}
 		}
 		else	/* kernel */
 		{
-			argv[2] = ptn->name;
+			if(!DEV_NUM) {
+				argv[2] = ptn->name;
+			}
 		}
 		sprintf(buffer, "0x%x", addr);
 
 		ret = do_movi(NULL, 0, argc, argv);
 
-		if (INF_REG3_REG == 7 && (!strcmp(ptn->name, "fwbl1") || !strcmp(ptn->name, "bootloader") ||
+		if ((INF_REG3_REG == 7 || DEV_NUM) && (!strcmp(ptn->name, "fwbl1") || !strcmp(ptn->name, "bootloader") ||
 					 !strcmp(ptn->name, "bl2") || !strcmp(ptn->name, "tzsw"))){
-			sprintf(run_cmd,"emmc close 0");
+			sprintf(run_cmd,"emmc close %d",DEV_NUM);
 			run_command(run_cmd, 0);
 		}
+		if(!strcmp(ptn->name, "bootloader") && !DEV_NUM)	// env reset...!!
+			movi_write_env(virt_to_phys((ulong)CONFIG_SYS_SDRAM_BASE));
 
 		/* the return value of do_movi is different from usual commands. Hence the followings. */
 		ret = 1 - ret;
@@ -787,6 +789,7 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 			{
 				gflag_reboot = 1;
 				return 0;
+				strcpy((char *)interface.transfer_buffer, (char *)FASTBOOT_REBOOT_MAGIC);
 			}
 			else
 			{
@@ -886,7 +889,7 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 				{
 					sprintf(run_cmd, "fatformat mmc 0:1");
 					status = run_command(run_cmd, 0);
-				}
+				} 
 			} else if(OmPin == BOOT_EMMC_4_4 || OmPin == BOOT_EMMC) {
 				char run_cmd[80];
 				status = 1;
@@ -1042,12 +1045,6 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 				sprintf(response, "OKAY");
 				fastboot_tx_status(response, strlen(response), FASTBOOT_TX_SYNC);
 				udelay (1000000); /* 1 sec */
-
-#ifdef CONFIG_ROOTFS_ATAGS
-				char ramdisk_size[32];
-				sprintf (ramdisk_size, "0x%x", fb_hdr->ramdisk_size);
-				setenv("rootfslen", ramdisk_size);
-#endif
 
 				if (ntohl(hdr->ih_magic) == IH_MAGIC) {
 					/* Looks like a kernel.. */
@@ -1518,7 +1515,7 @@ static int set_partition_table()
 #if defined(CFG_FASTBOOT_SDMMCBSP)
 static int set_partition_table_sdmmc()
 {
-	unsigned long long start, count;
+	int start, count;
 	unsigned char pid;
 	char dev_num[2];
 
@@ -1553,6 +1550,8 @@ static int set_partition_table_sdmmc()
 	ptable[pcount].length = 0;
 	ptable[pcount].flags = FASTBOOT_PTENTRY_FLAGS_USE_MOVI_CMD;
 	pcount++;
+	
+	if(DEV_NUM == 1) goto emmc_recovery;
 
 	/* Kernel */
 	strcpy(ptable[pcount].name, "kernel");
@@ -1600,13 +1599,18 @@ static int set_partition_table_sdmmc()
 
 	/* fat */
 	get_mmc_part_info(dev_num, 1, &start, &count, &pid);
-	if (pid != 0xc)
-		goto part_type_error;
+	if (pid != 0xc){
+		if (pid != 0xb)
+			goto part_type_error;
+	}
 	strcpy(ptable[pcount].name, "fat");
 	ptable[pcount].start = start * CFG_FASTBOOT_SDMMC_BLOCKSIZE;
 	ptable[pcount].length = count * CFG_FASTBOOT_SDMMC_BLOCKSIZE;
 	ptable[pcount].flags = FASTBOOT_PTENTRY_FLAGS_USE_MMC_CMD;
 	pcount++;
+
+emmc_recovery:
+part_type_error:
 
 #if 1 // Debug
 	fastboot_flash_dump_ptn();
@@ -1616,7 +1620,6 @@ static int set_partition_table_sdmmc()
 
 	return 0;
 
-part_type_error:
 	printf("Error: No MBR is found at SD/MMC.\n");
 	printf("Hint: use fdisk command to make partitions.\n");
 
@@ -1635,6 +1638,7 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	struct fastboot_ptentry *ptn;
 	unsigned int addr, size;
 	gflag_reboot = 0;
+
 /* checking boot mode before to set partition table	*/
 	switch(OmPin) {
 		case BOOT_ONENAND:
@@ -1643,6 +1647,16 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			}
 			break;
 		case BOOT_MMCSD:
+		#if defined(CONFIG_HKDK4412)
+			if ( argc == 2){
+				if ( strcmp(argv[1], "emmc") == 0 )	DEV_NUM = 1;
+			}
+			else DEV_NUM = 0;
+		#endif
+			if (set_partition_table_sdmmc()) {
+				return 1;
+			}
+			break;
 		case BOOT_EMMC_4_4:
 		case BOOT_EMMC:			
 			if (set_partition_table_sdmmc()) {
@@ -1655,11 +1669,6 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			}
 			break;
 		}
-	
-#if  0
-	if (set_partition_table())
-		return 1;
-#endif
 
 	if ((argc > 1) && (0 == strcmp(argv[1], "flash"))){
 		ptn = fastboot_flash_find_ptn(argv[2]);

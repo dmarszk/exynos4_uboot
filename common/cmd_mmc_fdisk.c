@@ -19,9 +19,9 @@
 #define		_100MB				(100*1024*1024)
 #define		_8_4GB				(1023*254*63)
 	
-#define		SYSTEM_PART_SIZE		(520*1024*1024)
-#define		USER_DATA_PART_SIZE		(520*1024*1024)
-#define		CACHE_PART_SIZE			(520*1024*1024)
+#define		SYSTEM_PART_SIZE		(896*1024*1024)
+#define		USER_DATA_PART_SIZE		(1024*1024*1024)
+#define		CACHE_PART_SIZE			(128*1024*1024)
 
 #define		CHS_MODE			0
 #define		LBA_MODE			!(CHS_MODE)
@@ -61,7 +61,7 @@ typedef struct
 } PartitionInfo;
 
 /////////////////////////////////////////////////////////////////
-int calc_unit(unsigned long long length, SDInfo sdInfo)
+int calc_unit(int length, SDInfo sdInfo)
 {
 	if (sdInfo.addr_mode == CHS_MODE)
 		return ( (length / BLOCK_SIZE / sdInfo.unit + 1 ) * sdInfo.unit);
@@ -242,7 +242,7 @@ int make_mmc_partition(int total_block_count, unsigned char *mbr, int flag, char
 // 반드시 Unit단위로 먼저 계산한다.
 	block_start = calc_unit(CFG_PARTITION_START, sdInfo);
 	if (flag)
-		block_offset = calc_unit((unsigned long long)simple_strtoul(argv[3], NULL, 0)*1024*1024, sdInfo);
+		block_offset = calc_unit(simple_strtoul(argv[3], NULL, 0)*1024*1024, sdInfo);
 	else
 		block_offset = calc_unit(SYSTEM_PART_SIZE, sdInfo);
 
@@ -254,7 +254,7 @@ int make_mmc_partition(int total_block_count, unsigned char *mbr, int flag, char
 ///////////////////////////////////////////////////////////	
 	block_start += block_offset;
 	if (flag)
-		block_offset = calc_unit((unsigned long long)simple_strtoul(argv[4], NULL, 0)*1024*1024, sdInfo);
+		block_offset = calc_unit(simple_strtoul(argv[4], NULL, 0)*1024*1024, sdInfo);
 	else
 		block_offset = calc_unit(USER_DATA_PART_SIZE, sdInfo);
 	
@@ -266,7 +266,7 @@ int make_mmc_partition(int total_block_count, unsigned char *mbr, int flag, char
 ///////////////////////////////////////////////////////////	
 	block_start += block_offset;
 	if (flag)
-		block_offset = calc_unit((unsigned long long)simple_strtoul(argv[5], NULL, 0)*1024*1024, sdInfo);
+		block_offset = calc_unit(simple_strtoul(argv[5], NULL, 0)*1024*1024, sdInfo);
 	else
 		block_offset = calc_unit(CACHE_PART_SIZE, sdInfo);
 
@@ -375,7 +375,7 @@ int put_mmc_mbr(unsigned char *mbr, char *device_name)
 }
 
 /////////////////////////////////////////////////////////////////
-int get_mmc_part_info(char *device_name, int part_num, unsigned long long *block_start, unsigned long long *block_count, unsigned char *part_Id)
+int get_mmc_part_info(char *device_name, int part_num, int *block_start, int *block_count, unsigned char *part_Id)
 {
 	int		rv;
 	PartitionInfo	partInfo;

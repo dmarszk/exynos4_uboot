@@ -124,8 +124,6 @@ const u8 config_high_total[] =
   0x07 ,0x05 ,0x02 ,0x02 ,0x00 ,0x02 ,0x00
 };
 
-const u8 set_sel[6];
-
 /*32 <cfg desc>+<if desc>+<endp0 desc>+<endp1 desc>*/
 #define CONFIG_DESC_TOTAL_SIZE	\
 	(CONFIG_DESC_SIZE+INTERFACE_DESC_SIZE+ENDPOINT_DESC_SIZE*2)
@@ -139,11 +137,7 @@ const u8 set_sel[6];
 #define USB_CAP_SS      0x3
 #define USB_CAP_CID     0x4
 
-#ifndef CONFIG_CPU_EXYNOS5250_EVT1
-#define USB_PHY_REF_CLK (DIFF_100MHz)
-#else
-#define USB_PHY_REF_CLK (EXTREF_24MHz)
-#endif
+
 u8 test_pkt [TEST_PKT_SIZE] = {
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	/*JKJKJKJK x 9*/
 	0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,	/*JJKKJJKK x 8*/
@@ -210,86 +204,22 @@ static void exynoy_usb_phy_on(void)
 
 static void exynos_usb_init_phy(void)
 {
-	usb3_phy_utmi_t usbdev3_phy_utmi;
 	usbdev3_phy_clkpwr_t usbdev3_phy_clkpwr;
-	u32 eClkFreq = USB_PHY_REF_CLK;
+	writel(0, EXYNOS_PHY_UTMI);
 
-	/* Reset PHY configuration */
-	writel(0x00000000, EXYNOS_PHY_REG0);
-	writel(0x24d4e6e4, EXYNOS_PHY_PARAM0); //must
-	writel(0x00000000, EXYNOS_PHY_RESUME);
-
-#ifdef CONFIG_CPU_EXYNOS5250_EVT1
-	writel(0x08000000, EXYNOS_PHY_LINKSYSTEM); // clear [8] : force_vbusvalid bit, [7] : force_bvalid
-	writel(0x03fff81c, EXYNOS_PHY_PARAM1); //must
-	writel(0x00000004, EXYNOS_PHY_BATCHG); // PHY CLK Mux. (1<<2) : w_FREECLK, (0<<2) : w_PHYCLK
-	if (eClkFreq == DIFF_100MHz)
-		writel(readl(EXYNOS_PHY_PARAM0) | (0x1<<31), EXYNOS_PHY_PARAM0); // use 100MHz clk
-#else
-	writel(0x087fffc0, EXYNOS_PHY_LINKSYSTEM); //must
-	writel(0x03fff820, EXYNOS_PHY_PARAM1); //must
-	writel(0x00000000, EXYNOS_PHY_BATCHG); //must
-	/* Over-current pin is inactive on SMDK5250 EVT0 */
-	writel((readl(EXYNOS_PHY_LINK_PORT) & ~(0x3<<4)) | (0x3<<2), EXYNOS_PHY_LINK_PORT);
-#endif
-	usbdev3_phy_utmi.data = 0x0;
-	usbdev3_phy_utmi.b.otg_disable = 0x1;
-
-	writel(usbdev3_phy_utmi.data, EXYNOS_PHY_UTMI);
-
+	/* Setting 100MHz Externel clock */
 	usbdev3_phy_clkpwr.data = 0;
-
-	switch(eClkFreq){
-		case DIFF_100MHz:
-			usbdev3_phy_clkpwr.b.fsel = 0x27;
-			usbdev3_phy_clkpwr.b.refclksel = 2; // DIFF PAD
-			usbdev3_phy_clkpwr.b.mpll_multiplier = 0x19;
-			usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;
-			usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x00;
-			break;
-		case EXTREF_50MHz:
-			usbdev3_phy_clkpwr.b.fsel = 0x7;
-			usbdev3_phy_clkpwr.b.refclksel = 3; // REFCLK_SINGLE
-			usbdev3_phy_clkpwr.b.mpll_multiplier = 0x32;
-			usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;
-			usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x00;
-			break;
-		case EXTREF_20MHz:
-			usbdev3_phy_clkpwr.b.fsel = 0x4;
-			usbdev3_phy_clkpwr.b.refclksel = 3; // REFCLK_SINGLE
-			usbdev3_phy_clkpwr.b.mpll_multiplier = 0x7d;
-			usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;
-			usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x00;
-			break;
-		case EXTREF_19_2MHz:
-			usbdev3_phy_clkpwr.b.fsel = 0x3;
-			usbdev3_phy_clkpwr.b.refclksel = 3; // REFCLK_SINGLE
-			usbdev3_phy_clkpwr.b.mpll_multiplier = 0x02;
-			usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;
-			usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x88;
-			break;
-		case EXTREF_24MHz:
-		default:
-			usbdev3_phy_clkpwr.b.fsel = 0x5;
-			usbdev3_phy_clkpwr.b.refclksel = 3; // REFCLK_SINGLE
-			usbdev3_phy_clkpwr.b.mpll_multiplier = 0x68;
-			usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;
-			usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x88;
-			break;
-	}
-
-#ifdef CONFIG_CPU_EXYNOS5250_EVT1
-	usbdev3_phy_clkpwr.b.commononn = 1;		// pll blocks are powered in suspend or sleep mode
-#else
-	usbdev3_phy_clkpwr.b.commononn = 0;
-#endif
+	usbdev3_phy_clkpwr.b.commononn = 0;		// pll blocks are powered in suspend or sleep mode
 	usbdev3_phy_clkpwr.b.portreset = 1;		// assert port_reset
+	usbdev3_phy_clkpwr.b.refclksel = 2;		// shared reference clock for HS & SS
 	usbdev3_phy_clkpwr.b.retenablen = 1;		// normal operating mode
-	usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;
-	usbdev3_phy_clkpwr.b.ref_ssp_en = 1;
-	usbdev3_phy_clkpwr.b.ssc_en = 1;
-	usbdev3_phy_clkpwr.b.ssc_range = 0;
-	usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x0;
+	usbdev3_phy_clkpwr.b.fsel = 0x27;		// refclksel=2일 때, ref. clk = 100Mhz, (0x38:19.2Mhz, 0x31:20Mhz, 0x2a:24Mhz, 0x27:100Mhz    )
+	usbdev3_phy_clkpwr.b.mpll_multiplier = 0x19;	//0x68; // mpll_multiplier for 24Mhz input, (0x68:24Mhz, 0x7d:20Mhz)
+	usbdev3_phy_clkpwr.b.ref_clkdiv2 = 0;		// not divide by 2
+	usbdev3_phy_clkpwr.b.ref_ssp_en = 1;		// ref. clock enable for ss function
+	usbdev3_phy_clkpwr.b.ssc_en = 1;		// spread specturm enable
+	usbdev3_phy_clkpwr.b.ssc_range = 0;		// ppm offset : 4980???
+	usbdev3_phy_clkpwr.b.ssc_ref_clk_sel = 0x0;	//0x88; // spread specturm ref. clock shifting for 24Mhz input(0x0:20Mhz, 0x88:24Mhz)
 
 	writel(usbdev3_phy_clkpwr.data, EXYNOS_PHY_CLKPWR);
 	usbdev3_phy_clkpwr.b.portreset = 0;
@@ -374,11 +304,7 @@ static void exynos_usb_set_descriptor_tlb(void)
 	oUsbDev3.m_oDesc.oDescDevice.bDeviceClass=0xFF;
 	oUsbDev3.m_oDesc.oDescDevice.bDeviceSubClass=0x0;
 	oUsbDev3.m_oDesc.oDescDevice.bDeviceProtocol=0x0;
-	if (oUsbDev3.m_eSpeed == USBDEV3_SPEED_SUPER) {
-		oUsbDev3.m_oDesc.oDescDevice.bMaxPacketSize0=SUPER_SPEED_CONTROL_PKT_EXP_SZ;
-	} else {
-		oUsbDev3.m_oDesc.oDescDevice.bMaxPacketSize0=oUsbDev3.m_uControlEPMaxPktSize;
-	}
+	oUsbDev3.m_oDesc.oDescDevice.bMaxPacketSize0=oUsbDev3.m_uControlEPMaxPktSize;
 	oUsbDev3.m_oDesc.oDescDevice.idVendorL=0xE8;
 	oUsbDev3.m_oDesc.oDescDevice.idVendorH=0x04;
 	oUsbDev3.m_oDesc.oDescDevice.idProductL=0x34;
@@ -1546,8 +1472,6 @@ void exynos_usb_handle_setup(void)
 
 		case STANDARD_SET_CONFIGURATION:
 			DBG_USBD3("\n MCU >> Set Configuration \n");
-			if (oUsbDev3.m_eSpeed == USBDEV3_SPEED_SUPER)
-				printf("Super speed enumeration success\n");
 			g_usConfig = oUsbDev3.m_oDeviceRequest.wValue_L; // Configuration value in configuration descriptor
 			oUsbDev3.m_eUsbDev3State = USBDEV3_STATE_CONFIGURED;
 
@@ -1724,6 +1648,7 @@ void exynos_usb_handle_setup(void)
 
 					break;
 				case BOS :
+					printf("BOS :");
 					if (oUsbDev3.m_uDeviceRequestLength == BOS_DESC_SIZE)
 						exynos_usb_start_ep0_in_xfer((u32)&oUsbDev3.m_oSSDesc.oDescBos, BOS_DESC_SIZE);
 					else
@@ -1904,17 +1829,6 @@ void exynos_usb_handle_setup(void)
 			break;
 
 		case STANDARD_SYNCH_FRAME:
-			break;
-
-		case STANDARD_SET_SEL:
-			oUsbDev3.m_bReq_Set_sel= 1;
-			/* For SET_SEL */
-			exynos_usb_start_ep0_out_xfer((u32)&set_sel, oUsbDev3.m_uControlEPMaxPktSize);
-			DBG_USBD3("Standard Req : SET SEL\n");
-			break;
-
-		case STANDARD_ISOCH_DELY:
-			DBG_USBD3("Standard Req : ISOCH Delay\n");
 			break;
 
 		default:
@@ -2180,9 +2094,12 @@ static void exynos_usb_handle_ep0_out_xfer_not_ready(void)
 {
 	switch (oUsbDev3.m_uEp0State) {
 		case EP0_STATE_OUT_WAIT_NRDY:
+			oUsbDev3.m_uEp0State = EP0_STATE_OUT_STATUS_PHASE;
+
 			// . to setup out-status phase
 			exynos_usb_setup_out_status_phase();
 			break;
+
 		// khs. this routine is abnormal case, and handling for this case is not prepared.
 		default :
 			DBG_USBD3("\nError : [EP0-OutXferNotReady]Not Supported @%d\n", oUsbDev3.m_uEp0State);
@@ -2348,7 +2265,6 @@ int exynos_usbctl_init(void)
 	usbdev3_gusb3pipectl_t usbdev3_gusb3pipectl;
 	usbdev3_gctl_t usbdev3_gctl;
 	USBDEV3_SPEED_e eSpeed = USBDEV3_SPEED_SUPER;
-	u32 mpll_clk, div_usbdrd3;
 
 	// . to initialize variables for usb device
 	//--------------------------------
@@ -2358,7 +2274,6 @@ int exynos_usbctl_init(void)
 	oUsbDev3.m_uEp0State = EP0_STATE_UNCONNECTED;
 	oUsbDev3.m_uEp0SubState = 0;
 	oUsbDev3.m_bEPs_Enabled = 0;
-	oUsbDev3.m_bReq_Set_sel = 0;
 	switch(eSpeed)
 	{
 		case USBDEV3_SPEED_SUPER:
@@ -2392,12 +2307,6 @@ int exynos_usbctl_init(void)
 	/* USBDEV3_Usb3PhyEnable();		  // USB PHY Enable */
 	exynoy_usb_phy_on();
 
-	/* EXYNOS5 EVT1 : PHY should be reset before global register configuration
-	   This sequence cover reset sequence on EXYNOS5 EVT0. */
-	exynos_usb_softreset_phy(1);
-	exynos_usb_init_phy();
-	exynos_usb_softreset_phy(0);
-
 	usbdev3_gusb2phycfg.data = readl(rGUSB2PHYCFG);
 	usbdev3_gusb2phycfg.b.suspend_usb2_phy = 0;
 	usbdev3_gusb2phycfg.b.enable_sleep_n = 0;
@@ -2411,25 +2320,14 @@ int exynos_usbctl_init(void)
 	//--------------------------
 	usbdev3_gctl.data = readl(rGCTL);
 	usbdev3_gctl.b.core_soft_reset = 1;	// to keep the core in reset state until phy clocks are stable(GCTL의 11번 bit 설명 참조)
-	/*
-	* WORKAROUND: DWC3 revisions <1.90a have a bug
-	* when The device fails to connect at SuperSpeed
-	* and falls back to high-speed mode which causes
-	* the device to enter in a Connect/Disconnect loop
-	*/
-	usbdev3_gctl.b.u2rst_ecn = 1;
 	writel(usbdev3_gctl.data, rGCTL);
+
+	exynos_usb_softreset_phy(1);
+	exynos_usb_init_phy();
+	exynos_usb_softreset_phy(0);
 
 	usbdev3_gctl.data = readl(rGCTL);
 	usbdev3_gctl.b.core_soft_reset = 0;	// to keep the core out of reset state after phy clocks are stable(GCTL의 11번 bit 설명 참조)
-	writel(usbdev3_gctl.data, rGCTL);
-
-	mpll_clk = 800000000; // mpll = 800 MHz
-	div_usbdrd3 = ((CLK_DIV_FSYS0>>24) & 0xf) + 1;
-
-	usbdev3_gctl.b.pwr_down_scale = (mpll_clk/div_usbdrd3)/16000;
-	usbdev3_gctl.b.ram_clk_sel = 1; // 00:bus clock, 01:pipe clock, 10:pipe/2 clock
-	usbdev3_gctl.b.DisScramble = 0;
 	writel(usbdev3_gctl.data, rGCTL);
 
 	is_fastboot = 0;

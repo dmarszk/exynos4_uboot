@@ -7,7 +7,7 @@
 # published by the Free Software Foundation.
 #
 ####################################
-reader_type1="/dev/sdb"
+reader_type1="/dev/sdc"
 reader_type2="/dev/mmcblk0"
 
 c210_bl1="c210N.nbl1.bin"

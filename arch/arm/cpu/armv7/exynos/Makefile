@@ -38,11 +38,17 @@ ifdef CONFIG_CMD_NAND
 COBJS	+= nand_write_bl.o
 endif
 COBJS	+= onenand_cp.o
-ifndef CONFIG_CPU_EXYNOS4X12
-ifndef CONFIG_CPU_EXYNOS5250
+
+ifdef CONFIG_HKDK4212
+COBJS	+= pmic_hkdk4212.o
+else
+ifdef CONFIG_HKDKC210
+COBJS	+= pmic_hkdk4210.o
+else
 COBJS	+= pmic.o
 endif
 endif
+
 ifdef CONFIG_SECURE_BOOT
 COBJS	+= UBOOT_SB20_S5PC210S.o
 COBJS	+= security_check.o
