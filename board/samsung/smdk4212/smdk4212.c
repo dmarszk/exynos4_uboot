@@ -27,60 +27,18 @@ unsigned int dmc_density = 0xffffffff;
 #endif
 unsigned int second_boot_info = 0xffffffff;
 
-/* ------------------------------------------------------------------------- */
-#define SMC9115_Tacs	(0x0)	// 0clk		address set-up
-#define SMC9115_Tcos	(0x4)	// 4clk		chip selection set-up
-#define SMC9115_Tacc	(0xe)	// 14clk	access cycle
-#define SMC9115_Tcoh	(0x1)	// 1clk		chip selection hold
-#define SMC9115_Tah	(0x4)	// 4clk		address holding time
-#define SMC9115_Tacp	(0x6)	// 6clk		page mode access cycle
-#define SMC9115_PMC	(0x0)	// normal(1data)page mode configuration
 
 #define SROM_DATA16_WIDTH(x)	(1<<((x*4)+0))
 #define SROM_WAIT_ENABLE(x)	(1<<((x*4)+1))
 #define SROM_BYTE_ENABLE(x)	(1<<((x*4)+2))
 
-/*
- * Miscellaneous platform dependent initialisations
- */
-static void smc9115_pre_init(void)
-{
-        unsigned int cs1;
-	/* gpio configuration */
-	writel(0x00220020, 0x11000000 + 0x120);
-	writel(0x00002222, 0x11000000 + 0x140);
-
-	/* 16 Bit bus width */
-	writel(0x22222222, 0x11000000 + 0x180);
-	writel(0x0000FFFF, 0x11000000 + 0x188);
-	writel(0x22222222, 0x11000000 + 0x1C0);
-	writel(0x0000FFFF, 0x11000000 + 0x1C8);
-	writel(0x22222222, 0x11000000 + 0x1E0);
-	writel(0x0000FFFF, 0x11000000 + 0x1E8);
-
-	/* SROM BANK1 */
-        cs1 = SROM_BW_REG & ~(0xF<<4);
-	cs1 |= ((1 << 0) |
-		(0 << 2) |
-		(1 << 3)) << 4;                
-
-        SROM_BW_REG = cs1;
-
-	/* set timing for nCS1 suitable for ethernet chip */
-	SROM_BC1_REG = ( (0x1 << 0) |
-		     (0x9 << 4) |
-		     (0xc << 8) |
-		     (0x1 << 12) |
-		     (0x6 << 16) |
-		     (0x1 << 24) |
-		     (0x1 << 28) );
-}
 
 #define	PS_HOLD		*(volatile unsigned long *)(0x1002330C)
 
 int board_init(void)
 {
-#if !defined(CONFIG_HKDK4212)
+#if defined(EXYNOS4_GALAXY)
+#elif !defined(CONFIG_HKDK4212)
 	u8 read_vol_arm;
 	u8 read_vol_int;
 	u8 read_vol_g3d;
@@ -127,26 +85,6 @@ int board_init(void)
 	else	{
 		printf("\nPMIC VERSION : 0x%02X, CHIP REV : %d\n", ((rwdata >> 3) & 0x1F), (rwdata & 0x7));
 	}
-//	if(pmic_read(0x53, &rwdata, 1))	printf("pmic read error!\n");
-//	else	{
-//		printf("LDO20 : 0x%02X\n", rwdata);
-//	}
-//	if(pmic_read(0x56, &rwdata, 1))	printf("pmic read error!\n");
-//	else	{
-//		printf("LDO23 : 0x%02X\n", rwdata);
-//	}
-//	if(pmic_read(0x57, &rwdata, 1))	printf("pmic read error!\n");
-//	else	{
-//		printf("LDO24 : 0x%02X\n", rwdata);
-//	}
-//	if(pmic_read(0x58, &rwdata, 1))	printf("pmic read error!\n");
-//	else	{
-//		printf("LDO25 : 0x%02X\n", rwdata);
-//	}
-//	if(pmic_read(0x59, &rwdata, 1))	printf("pmic read error!\n");
-//	else	{
-//		printf("LDO26 : 0x%02X\n", rwdata);
-//	}
 #endif
 
 	/* display BL1 version */
@@ -155,10 +93,6 @@ int board_init(void)
 #else
 	strncpy(&bl1_version[0], (char *)0x02022fc8, 8);
 	printf("\nBL1 version: %s\n", &bl1_version[0]);
-#endif
-	
-#ifdef CONFIG_SMC911X
-	smc9115_pre_init();
 #endif
 
 #ifdef CONFIG_SMDKC220
@@ -279,9 +213,7 @@ void dram_init_banksize(void)
 int board_eth_init(bd_t *bis)
 {
 	int rc = 0;
-#ifdef CONFIG_SMC911X
-	rc = smc911x_initialize(0, CONFIG_SMC911X_BASE);
-#endif
+
 	return rc;
 }
 
