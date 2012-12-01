@@ -95,7 +95,11 @@ int board_init(void)
 #endif	
 	char bl1_version[9] = {0};
 
-#if !defined(CONFIG_HKDK4212)
+#if defined(EXYNOS4_GALAXY)
+
+	PS_HOLD = 0x5300;
+	
+#elif !defined(CONFIG_HKDK4212)
 	IIC0_ERead(0xcc, 0x19, &read_vol_arm);
 	IIC0_ERead(0xcc, 0x22, &read_vol_int);
 	IIC0_ERead(0xcc, 0x2B, &read_vol_g3d);

@@ -44,6 +44,8 @@
 #define CONFIG_EVT1		1	/* EVT1 */
 //#define NAND_BOOTING		1
 
+#define EXYNOS4_GALAXY
+
 #define CONFIG_TRUSTZONE
 #define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
 
@@ -237,11 +239,9 @@
 #define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser	*/
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
 
-#if defined(CONFIG_HKDK4412)
-	#define CONFIG_SYS_PROMPT		"ODROID4412 # "
-#else
-	#define CONFIG_SYS_PROMPT		"SMDK4412 # "
-#endif
+
+#define CONFIG_SYS_PROMPT		"GALAXY # "
+
 #define CONFIG_SYS_CBSIZE	256	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE	384	/* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS	16	/* max number of command args */
@@ -296,11 +296,8 @@
 
 #define CONFIG_SYS_MONITOR_LEN		(256 << 10)	/* 256 KiB */
 
-#if defined(CONFIG_HKDK4412)
-	#define CONFIG_IDENT_STRING		" for ODROID4412"
-#else
-	#define CONFIG_IDENT_STRING		" for SMDK4412"
-#endif
+
+#define CONFIG_IDENT_STRING		" for EXYNOS4_GALAXY"
 
 #define CONFIG_ENABLE_MMU
 
