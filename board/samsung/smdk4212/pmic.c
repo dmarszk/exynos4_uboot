@@ -792,6 +792,7 @@ void pmic_max77686_init(void)
 void pmic_s5m8767_print(void)
 {
 	u8 read_data;
+	IIC1_ESetport();
 	printf("====================\n");
 	printf("S5M8767 PMIC registers \n");
 	printf("====================\n");
@@ -844,6 +845,7 @@ void pmic_print_info(void)
 {	
 	uint8_t pmic_id;
 	IIC0_ESetport();
+	IIC1_ESetport();
 	IIC0_ERead(MAX8997_ADDR, 0, &pmic_id);
 	if (pmic_id == 0x77) {
 		printf("PMIC: MAX8997\n");
