@@ -44,9 +44,6 @@
 #define CONFIG_EVT1		1	/* EVT1 */
 //#define NAND_BOOTING		1
 
-#define	CONFIG_HKDK4212		/* Hardkernel defined */
-#define	CONFIG_HKDK4412		/* Hardkernel defined */
-
 #define CONFIG_TRUSTZONE
 #define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
 
