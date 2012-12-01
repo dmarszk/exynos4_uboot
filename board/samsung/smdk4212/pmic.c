@@ -658,61 +658,76 @@ void I2C_S5M8767_VolSetting(PMIC_RegNum eRegNum, unsigned char ucVolLevel, unsig
 	IIC0_EWrite(S5M8767_ADDR, reg_addr, vol_level);
 }
 
+void pmic_max77686_init(void)
+{
+	u8 read_vol_arm;
+	u8 read_vol_int;
+	u8 read_vol_g3d;
+	u8 read_vol_mif;
+	u8 read_vol_mem;
+	u8 read_vol_apll;
+	
+	/* set DVS1,2,3 as 0 by GPL0 */
+	*((volatile unsigned int *)0x110000c0) = 0x11111111;
+	*((volatile unsigned int *)0x110000c4) = 0x7;
+	*((volatile unsigned int *)0x110000c4) = 0x0;
+	*((volatile unsigned int *)0x110000c4) = 0x7;
+	*((volatile unsigned int *)0x110000c4) = 0x0;
+	*((volatile unsigned int *)0x110000c0) = 0x0;
+	
+		
+	/* VDD_MIF */
+	IIC0_EWrite(MAX77686_ADDR, 0x11, CALC_MAXIM77686_BUCK156789_VOLT(CONFIG_PM_VDD_MIF));
+	/* VDD_ARM */
+	IIC0_EWrite(MAX77686_ADDR, 0x14, CALC_MAXIM77686_BUCK234_VOLT(CONFIG_PM_VDD_ARM));
+	/* VDD_INT */
+	IIC0_EWrite(MAX77686_ADDR, 0x1E, CALC_MAXIM77686_BUCK234_VOLT(CONFIG_PM_VDD_INT));
+	/* VDD_G3D */
+	IIC0_EWrite(MAX77686_ADDR, 0x28, CALC_MAXIM77686_BUCK234_VOLT(CONFIG_PM_VDD_G3D));
+
+
+	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK2TV_DVS1, &read_vol_arm);
+	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK3TV_DVS1, &read_vol_int);
+	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK4TV_DVS1, &read_vol_g3d);
+	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK1OUT, &read_vol_mif);
+	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK5OUT, &read_vol_mem);
+	
+	printf("ARM: %dmV\t", ((unsigned int)(read_vol_arm >> 1) * 25) + 600);
+	printf("INT: %dmV\t", ((unsigned int)(read_vol_int >> 1) * 25) + 600);
+	printf("G3D: %dmV\n", ((unsigned int)(read_vol_g3d >> 1)* 25) + 600);
+	printf("MIF: %dmV\t", ((unsigned int)(read_vol_mif & 0x3F) * 50) + 750);
+	printf("MEM: %dmV\n", ((unsigned int)(read_vol_mem & 0x3F) * 50) + 750);
+}
 
 void pmic_init(void)
 {
-	float vdd_arm, vdd_int, vdd_g3d;
-	float vdd_mif;
-	float vdd_ldo14;
-
-	u8 read_data;
-
-	vdd_arm = CONFIG_PM_VDD_ARM;
-	vdd_int = CONFIG_PM_VDD_INT;
-	vdd_g3d = CONFIG_PM_VDD_G3D;
-	vdd_mif = CONFIG_PM_VDD_MIF;
-	vdd_ldo14 = CONFIG_PM_VDD_LDO14;
+	u8 pmic_id;
 
 	IIC0_ESetport();
-	IIC3_ESetport();
 
 	/* read ID */
-	IIC0_ERead(MAX8997_ADDR, 0, &read_data);
-	if (read_data == 0x77) {
-		I2C_MAX8997_VolSetting(PMIC_BUCK1, CALC_MAXIM_BUCK1245_VOLT(vdd_arm * 1000), 1);
-		I2C_MAX8997_VolSetting(PMIC_BUCK2, CALC_MAXIM_BUCK1245_VOLT(vdd_int * 1000), 1);
-		I2C_MAX8997_VolSetting(PMIC_BUCK3, CALC_MAXIM_BUCK37_VOLT(vdd_g3d * 1000), 1);
+	IIC0_ERead(MAX8997_ADDR, 0, &pmic_id);
+	if (pmic_id == 0x77) {
+		printf("PMIC: MAX8997\n");
+		I2C_MAX8997_VolSetting(PMIC_BUCK1, CALC_MAXIM_BUCK1245_VOLT(CONFIG_PM_VDD_ARM), 1);
+		I2C_MAX8997_VolSetting(PMIC_BUCK2, CALC_MAXIM_BUCK1245_VOLT(CONFIG_PM_VDD_INT), 1);
+		I2C_MAX8997_VolSetting(PMIC_BUCK3, CALC_MAXIM_BUCK37_VOLT(CONFIG_PM_VDD_G3D), 1);
 
 		/* LDO14 config */
-		I2C_MAX8997_VolSetting(PMIC_LDO14, CALC_MAXIM_ALL_LDO(vdd_ldo14 * 1000), 3);
+		I2C_MAX8997_VolSetting(PMIC_LDO14, CALC_MAXIM_ALL_LDO(CONFIG_PM_VDD_LDO14), 3);
 
-		/* VDD_MIF, mode 1 register */
-		IIC3_EWrite(MAX8952_ADDR, 0x01, 0x80 | (((unsigned char)(vdd_mif * 100))-77));
-	} else if(read_data == 0x3) {
-		I2C_S5M8767_VolSetting(PMIC_BUCK1, CALC_S5M8767_VOLT2(vdd_mif * 1000), 1);
-		I2C_S5M8767_VolSetting(PMIC_BUCK2, CALC_S5M8767_VOLT1(vdd_arm * 1000), 1);
-		I2C_S5M8767_VolSetting(PMIC_BUCK3, CALC_S5M8767_VOLT1(vdd_int * 1000), 1);
-		I2C_S5M8767_VolSetting(PMIC_BUCK4, CALC_S5M8767_VOLT1(vdd_g3d * 1000), 1);
+	} else if(pmic_id >= 0x0 && pmic_id <= 0x5) {
+		printf("PMIC: S5M8767\n");
+		I2C_S5M8767_VolSetting(PMIC_BUCK1, CALC_S5M8767_VOLT2(CONFIG_PM_VDD_MIF), 1);
+		I2C_S5M8767_VolSetting(PMIC_BUCK2, CALC_S5M8767_VOLT1(CONFIG_PM_VDD_ARM), 1);
+		I2C_S5M8767_VolSetting(PMIC_BUCK3, CALC_S5M8767_VOLT1(CONFIG_PM_VDD_INT), 1);
+		I2C_S5M8767_VolSetting(PMIC_BUCK4, CALC_S5M8767_VOLT1(CONFIG_PM_VDD_G3D), 1);
 
 		IIC0_EWrite(S5M8767_ADDR, 0x5A, 0x58);
 	} else {
-		/* set DVS1,2,3 as 0 by GPL0 */
-		*((volatile unsigned int *)0x110000c0) = 0x11111111;
-		*((volatile unsigned int *)0x110000c4) = 0x7;
-		*((volatile unsigned int *)0x110000c4) = 0x0;
-		*((volatile unsigned int *)0x110000c4) = 0x7;
-		*((volatile unsigned int *)0x110000c4) = 0x0;
-		*((volatile unsigned int *)0x110000c0) = 0x0;
-		
-		/* VDD_MIF */
-		IIC0_EWrite(MAX77686_ADDR, 0x11, CALC_MAXIM77686_BUCK156789_VOLT(vdd_mif * 1000));
-		/* VDD_ARM */
-		IIC0_EWrite(MAX77686_ADDR, 0x14, CALC_MAXIM77686_BUCK234_VOLT(vdd_arm * 1000));
-		/* VDD_INT */
-		IIC0_EWrite(MAX77686_ADDR, 0x1E, CALC_MAXIM77686_BUCK234_VOLT(vdd_int * 1000));
-		/* VDD_G3D */
-		IIC0_EWrite(MAX77686_ADDR, 0x28, CALC_MAXIM77686_BUCK234_VOLT(vdd_g3d * 1000));
+		printf("PMIC: MAX77686\n");
+		pmic_max77686_init();
 	}
 
-	GPA1PUD |= (0x5<<4);	// restore reset value: Pull Up/Down Enable SCL, SDA
+	//GPA1PUD |= (0x5<<4);	// restore reset value: Pull Up/Down Enable SCL, SDA
 }

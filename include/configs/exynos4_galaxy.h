@@ -126,11 +126,11 @@
 
 /* Power Management is enabled */
 #define CONFIG_PM
-#define CONFIG_PM_VDD_ARM	1.2
-#define CONFIG_PM_VDD_INT	1.0
-#define CONFIG_PM_VDD_G3D	1.1
-#define CONFIG_PM_VDD_MIF	1.1
-#define CONFIG_PM_VDD_LDO14	1.8
+#define CONFIG_PM_VDD_ARM	1200
+#define CONFIG_PM_VDD_INT	1000
+#define CONFIG_PM_VDD_G3D	1100
+#define CONFIG_PM_VDD_MIF	1100
+#define CONFIG_PM_VDD_LDO14	1800
 
 
 /*
