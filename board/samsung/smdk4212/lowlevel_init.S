@@ -67,6 +67,12 @@ lowlevel_init:
 	ldr	r2, =0xFFFFFFFD
 	and	r1, r1, r2
 	str	r1, [r0]
+	
+	
+	ldr r0, =0x10500054
+	ldr r1, [r0]
+	orr r1, r1, #0xF
+	str r1, [r0]
 
 	/* During sleep/wakeup or AFTR mode, pmic_init function is not available 
 	 * and it causes delays. So except for sleep/wakeup and AFTR mode, 
