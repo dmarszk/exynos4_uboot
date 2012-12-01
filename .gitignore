@@ -31,6 +31,12 @@
 /u-boot-onenand.bin
 /u-boot-flexonenand.bin
 /bl2.bin
+/sd_image.bin
+
+# fusing tools
+/sd_fuse/c210-mkbl1
+/sd_fuse/mkbl2
+/sd_fuse/sd_fdisk
 
 #
 # Generated files

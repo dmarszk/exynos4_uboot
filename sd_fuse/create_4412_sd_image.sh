@@ -9,7 +9,7 @@
 ####################################
 if [ -z $1 ]
 then
-    echo "usage: ./create_sd_image.sh <output file>"
+    echo "usage: ./create_4412_sd_image.sh <output file>"
     exit 0
 fi
 
@@ -40,4 +40,3 @@ dd iflag=dsync oflag=dsync if=./p4412_s_tzsw.bin of=$1 seek=$tzsw_position
 ####################################
 #<Message Display>
 echo "U-boot image is fused successfully."
-echo "Eject SD card and insert it again."
