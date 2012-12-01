@@ -97,7 +97,7 @@ int board_init(void)
 
 #if defined(EXYNOS4_GALAXY)
 
-	PS_HOLD = 0x5300;
+	PS_HOLD |= 0x300;
 	
 #elif !defined(CONFIG_HKDK4212)
 	IIC0_ERead(0xcc, 0x19, &read_vol_arm);
