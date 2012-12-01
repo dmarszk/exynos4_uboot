@@ -347,7 +347,6 @@ $(obj)u-boot.bin:	$(obj)u-boot
 ifeq ($(CONFIG_S5PC210),y)
 		./mkbl2 u-boot.bin bl2.bin 14336		
 		make -C sd_fuse/
-		. sd_fuse/create_4412_sd_image.sh ../sd_image.bin
 endif
 
 $(obj)u-boot.ldr:	$(obj)u-boot

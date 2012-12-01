@@ -28,6 +28,7 @@ all:
 	$(CC) $(CFLAGS)	mkbl2 V310-EVT1-mkbl2.c 
 	$(CC) $(CFLAGS)	sd_fdisk sd_fdisk.c
 	$(CC) $(CFLAGS)	c210-mkbl1 c210-mkbl1.c 
+	./create_4412_sd_image.sh ../sd_image.bin
 
 #---------------------------------------------------------------------------------------
 .c.o:
