@@ -142,7 +142,7 @@
 /*
  * select serial console configuration
  */
-#define CONFIG_SERIAL2			1
+#define CONFIG_SERIAL1			1
 #define CONFIG_SERIAL_MULTI		1
 
 #define CONFIG_USB_OHCI
