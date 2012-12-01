@@ -35,6 +35,10 @@ SOBJS	:= lowlevel_init.o
 SOBJS	+= mem_init_smdk4212.o
 SOBJS	+= clock_init_smdk4212.o
 
+ifdef CONFIG_EXYNOS4_GALAXY
+COBJS-y	+= pmic.o
+endif
+
 SRCS    := $(SOBJS:.o=.S) $(COBJS-y:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS-y))
 SOBJS	:= $(addprefix $(obj),$(SOBJS))

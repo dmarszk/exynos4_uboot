@@ -37,56 +37,10 @@ unsigned int second_boot_info = 0xffffffff;
 
 int board_init(void)
 {
-#if defined(EXYNOS4_GALAXY)
-#elif !defined(CONFIG_HKDK4212)
-	u8 read_vol_arm;
-	u8 read_vol_int;
-	u8 read_vol_g3d;
-	//u8 read_vol_mif;
-	u8 buck1_ctrl;
-	u8 buck2_ctrl;
-	u8 buck3_ctrl;
-	//u8 buck4_ctrl;
-	u8 ldo14_ctrl;
-#else	
-	unsigned char	rwdata;
-#endif	
 	char bl1_version[9] = {0};
 
-#if defined(EXYNOS4_GALAXY)
-
-	PS_HOLD |= 0x300;
+	pmic_print_info();
 	
-#elif !defined(CONFIG_HKDK4212)
-	IIC0_ERead(0xcc, 0x19, &read_vol_arm);
-	IIC0_ERead(0xcc, 0x22, &read_vol_int);
-	IIC0_ERead(0xcc, 0x2B, &read_vol_g3d);
-	//IIC0_ERead(0xcc, 0x2D, &read_vol_mif);
-	IIC0_ERead(0xcc, 0x18, &buck1_ctrl);
-	IIC0_ERead(0xcc, 0x21, &buck2_ctrl);
-	IIC0_ERead(0xcc, 0x2A, &buck3_ctrl);
-	//IIC0_ERead(0xcc, 0x2C, &buck4_ctrl);
-	IIC0_ERead(0xcc, 0x48, &ldo14_ctrl);
-
-	printf("vol_arm: %X\n", read_vol_arm);
-	printf("vol_int: %X\n", read_vol_int);
-	printf("vol_g3d: %X\n", read_vol_g3d);
-	//printf("vol_mif: %X\n", read_vol_mif);
-	printf("buck1_ctrl: %X\n", buck1_ctrl);
-	printf("buck2_ctrl: %X\n", buck2_ctrl);
-	printf("buck3_ctrl: %X\n", buck3_ctrl);
-	//printf("buck4_ctrl: %X\n", buck4_ctrl);
-	printf("ldo14_ctrl: %X\n", ldo14_ctrl);
-#else	
-	
-	PS_HOLD = 0x5300;
-	
-	if(pmic_read(0x00, &rwdata, 1))	printf("pmic read error!\n");
-	else	{
-		printf("\nPMIC VERSION : 0x%02X, CHIP REV : %d\n", ((rwdata >> 3) & 0x1F), (rwdata & 0x7));
-	}
-#endif
-
 	/* display BL1 version */
 #ifdef CONFIG_TRUSTZONE
 	printf("\nBL1 version: N/A (TrustZone Enabled BSP)\n");
