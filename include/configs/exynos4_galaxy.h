@@ -44,6 +44,7 @@
 #define CONFIG_EVT1		1	/* EVT1 */
 //#define NAND_BOOTING		1
 
+
 #define EXYNOS4_GALAXY
 
 #define CONFIG_TRUSTZONE
@@ -158,6 +159,9 @@
  * Command definition
  ***********************************************************/
 #include <config_cmd_default.h>
+
+#undef	CONFIG_CMD_NET
+#undef	CONFIG_CMD_NFS
 
 #define CONFIG_CMD_PING
 
