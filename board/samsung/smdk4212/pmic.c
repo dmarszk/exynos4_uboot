@@ -230,32 +230,38 @@ void pmic_s5m8767_init(void)
 			val = ~cur_reg->mask;
 			val |= cur_reg->value;
 		}
+		printf("%s set reg 0x%X to 0x%X with mask 0x%X\n", __func__, cur_reg->reg_id, cur_reg->value, cur_reg->mask);
 		IIC7_EWrite(S5M8767_ADDR, cur_reg->reg_id, val);
 		cur_reg++;
 	}
 	ldo_id = 0;
 	cur_ldo = pmic_s5m8767_init_ldos;
 	while(cur_ldo->en1 != 0xFF)
-	{		
+	{
 		if (ldo_id > 1) //after LDO2 there are LDO2_2 LDO2_3 LDO2_4, jump over them
 			ldo_reg_id = ldo_id + 95;
 		else
 			ldo_reg_id = ldo_id + 92;
-		if(cur_ldo->en1 == cur_ldo->en2) {
+			
+		if(cur_ldo->en1 == cur_ldo->en2) {		
+			printf("%s set LDO%d to V %d\n", __func__, ldo_id+1, cur_ldo->voltage);
 			if(is_ldo_1_2_6_7_8_15(ldo_id))
 				pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_LDO1267815_VOLT(cur_ldo->voltage), 0x3F);
 			else				
 				pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_ALL_LDO_VOLT(cur_ldo->voltage), 0x3F);
 		}
 		else if(cur_ldo->voltage) {
+		
+			printf("%s set LDO%d to V %d with enable 0x%X\n", __func__, ldo_id+1, cur_ldo->voltage, cur_ldo->en2);
 		    if(is_ldo_1_2_6_7_8_15(ldo_id))
 				pmic_s5m8767_update_reg(ldo_reg_id, (cur_ldo->en2 << 6) | CALC_S5M8767_LDO1267815_VOLT(cur_ldo->voltage), 0xFF);
 			else				
 				pmic_s5m8767_update_reg(ldo_reg_id, (cur_ldo->en2 << 6) | CALC_S5M8767_ALL_LDO_VOLT(cur_ldo->voltage), 0xFF);				
 		}
 		else {		
+			printf("%s set LDO%d to enable 0x%X\n", __func__, ldo_id+1, cur_ldo->en2);
 			pmic_s5m8767_update_reg(ldo_reg_id, (cur_ldo->en2 << 6), 0xC0);	
-		}		
+		}	
 		cur_ldo++;
 		ldo_id++;
 	}
@@ -282,7 +288,7 @@ void pmic_init(void)
 	u8 pmic_id;
 	I2C_InitIp(7, 400*1000, 1000000);
 
-#if 0
+
 	/* read ID */
 	IIC7_ERead(S5M8767_ADDR, 0, &pmic_id);
 	if(pmic_id >= 0x0 && pmic_id <= 0x5) {
@@ -290,6 +296,6 @@ void pmic_init(void)
 	} else {
 		pmic_max77686_init();
 	}
-#endif
+
 	//GPA1PUD |= (0x5<<4);	// restore reset value: Pull Up/Down Enable SCL, SDA
 }
