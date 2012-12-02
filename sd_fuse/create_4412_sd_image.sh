@@ -39,4 +39,4 @@ dd iflag=dsync oflag=dsync if=./p4412_s_tzsw.bin of=$1 seek=$tzsw_position
 
 ####################################
 #<Message Display>
-echo "U-boot image is fused successfully."
+echo "$1 - Exynos4412 U-Boot SD card image is ready."
