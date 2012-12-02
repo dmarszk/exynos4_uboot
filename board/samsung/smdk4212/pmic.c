@@ -713,36 +713,47 @@ void I2C_MAX8997_EnableReg(PMIC_RegNum eRegNum, u8 ucEnable)
 	IIC0_EWrite(MAX8997_ADDR, reg_addr, read_data);
 }
 
-void I2C_S5M8767_VolSetting(PMIC_RegNum eRegNum, unsigned char ucVolLevel, unsigned char ucEnable)
+void pmic_s5m8767_update_reg(uint8_t reg_id, uint8_t value, uint8_t mask)
+{
+	uint8_t read_val;
+	value &= mask; //just for sanity	
+	IIC1_ERead(S5M8767_ADDR, reg_id, &read_val);
+	read_val &= ~mask;
+	read_val |= value;	
+	IIC1_EWrite(S5M8767_ADDR, reg_id, read_val);
+}
+
+void I2C_S5M8767_SetupBuck(PMIC_RegNum eRegNum, unsigned char ucVolLevel, unsigned char ucEnable)
 {
 	unsigned char reg_addr, reg_bitpos, reg_bitmask, vol_level;
 
 	reg_bitpos = 0;
 	reg_bitmask = 0xFF;
-	if(eRegNum == 0)
+	
+	if(eRegNum == PMIC_BUCK1)  // BUCK1
 	{
 		reg_addr = 0x33;
 	}
-	else if(eRegNum == 1)
+	else if(eRegNum == PMIC_BUCK2)  // BUCK2
 	{
-	        reg_addr = 0x35;
+		reg_addr = 0x35;
 	}
-	else if(eRegNum == 2)
+	else if(eRegNum == PMIC_BUCK3)  //  BUCK3
 	{
-	        reg_addr = 0x3E;
+		reg_addr = 0x3E;
 	}
-	else if(eRegNum == 3)
+	else if(eRegNum == PMIC_BUCK4)  // BUCK4
 	{
 		reg_addr = 0x47;
 	}
-	else if(eRegNum == 4)
+	else if(eRegNum == PMIC_BUCK5) // BUCK5
 	{
 		reg_addr = 0x50;
 	}
 	else
 	      while(1);
 
-	vol_level = ucVolLevel&reg_bitmask;
+	vol_level = ucVolLevel & reg_bitmask ;
 	IIC1_EWrite(S5M8767_ADDR, reg_addr, vol_level);
 }
 void pmic_max77686_print(void)
@@ -752,7 +763,6 @@ void pmic_max77686_print(void)
 	u8 read_vol_g3d;
 	u8 read_vol_mif;
 	u8 read_vol_mem;
-	u8 read_vol_apll;
 	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK2TV_DVS1, &read_vol_arm);
 	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK3TV_DVS1, &read_vol_int);
 	IIC0_ERead(MAX77686_ADDR, MAX77686_BUCK4TV_DVS1, &read_vol_g3d);
@@ -830,17 +840,114 @@ void pmic_s5m8767_print(void)
 	printf("S5M8767_REG_BUCHG = 0x%02x\n", read_data);	
 	
 }
+
+int is_ldo_1_2_6_7_8_15(uint8_t ldo_id)
+{
+	if (ldo_id <= 0xE && (1 << ldo_id) & 0x40E3 )
+		return 1;
+	return 0;
+}
+
+struct pmic_s5m8767_init_reg_entry
+{
+	uint8_t reg_id;
+	uint8_t value;
+	uint8_t mask;
+};
+struct pmic_s5m8767_init_ldo_val
+{
+	uint8_t en1;
+	uint8_t en2;
+	uint16_t voltage;
+};
+struct pmic_s5m8767_init_reg_entry pmic_s5m8767_init_data[] = {
+	{0xE, 0x6F, 0},
+	{0x5A, 0x58, 0},
+	{0x5B, 0xB4, 0},
+	{0xA, 0xE, 0xE},
+	{0xFF, 0xFF, 0}
+};
+struct pmic_s5m8767_init_ldo_val pmic_s5m8767_init_ldos[29] =
+{
+  { 0x3, 0x3, 0 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0x3, 0 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0, 0 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0x1, 0 },
+  { 0, 0, 1800 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0x1, 1950 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0, 0 },
+  { 0x3, 0x1, 1950 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0x1, 0 },
+  { 0x3, 0x3, 0 },
+  { 0, 0, 0 },
+  { 0, 0x1, 1800 },
+  { 0, 0, 3300 },
+  { 0, 0, 3300 },
+  { 0, 0, 2800 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 1500 },
+  { 0, 0, 0 },
+  { 0xFF, 0xFF, 0 }
+};
+
 void pmic_s5m8767_init(void)
 {
-	
-	I2C_S5M8767_VolSetting(PMIC_BUCK1, CALC_S5M8767_BUCK156_VOLT(CONFIG_PM_VDD_MIF), 1);
-	I2C_S5M8767_VolSetting(PMIC_BUCK2, CALC_S5M8767_BUCK234_VOLT(CONFIG_PM_VDD_ARM), 1);
-	I2C_S5M8767_VolSetting(PMIC_BUCK3, CALC_S5M8767_BUCK234_VOLT(CONFIG_PM_VDD_INT), 1);
-	I2C_S5M8767_VolSetting(PMIC_BUCK4, CALC_S5M8767_BUCK234_VOLT(CONFIG_PM_VDD_G3D), 1);
-
-	IIC1_EWrite(S5M8767_ADDR, 0x5A, 0x58);
-
+	struct pmic_s5m8767_init_reg_entry* cur_reg;
+	struct pmic_s5m8767_init_ldo_val* cur_ldo;
+	uint8_t val;
+	int ldo_id;
+	int ldo_reg_id;
+	cur_reg = pmic_s5m8767_init_data;
+	while(cur_reg->reg_id != 0xFF)
+	{
+		val = cur_reg->value;
+		if(cur_reg->mask)
+		{
+			IIC1_ERead(S5M8767_ADDR, cur_reg->reg_id, &val);
+			val = ~cur_reg->mask;
+			val |= cur_reg->value;
+		}
+		IIC1_EWrite(S5M8767_ADDR, cur_reg->reg_id, val);
+		cur_reg++;
+	}
+	ldo_id = 0;
+	cur_ldo = pmic_s5m8767_init_ldos;
+	while(cur_ldo->en1 != 0xFF)
+	{		
+		if (ldo_id > 1) //after LDO2 there are LDO2_2 LDO2_3 LDO2_4, jump over them
+			ldo_reg_id = ldo_id + 95;
+		else
+			ldo_reg_id = ldo_id + 92;
+		if(cur_ldo->en1 == cur_ldo->en2) {
+			if(is_ldo_1_2_6_7_8_15(ldo_id))
+				pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_LDO1267815_VOLT(cur_ldo->voltage), 0x3F);
+			else				
+				pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_ALL_LDO_VOLT(cur_ldo->voltage), 0x3F);
+		}
+		else if(cur_ldo->voltage) {
+		    if(is_ldo_1_2_6_7_8_15(ldo_id))
+				pmic_s5m8767_update_reg(ldo_reg_id, (cur_ldo->en2 << 6) | CALC_S5M8767_LDO1267815_VOLT(cur_ldo->voltage), 0xFF);
+			else				
+				pmic_s5m8767_update_reg(ldo_reg_id, (cur_ldo->en2 << 6) | CALC_S5M8767_ALL_LDO_VOLT(cur_ldo->voltage), 0xFF);				
+		}
+		else {		
+			pmic_s5m8767_update_reg(ldo_reg_id, (cur_ldo->en2 << 6), 0xC0);	
+		}		
+		cur_ldo++;
+		ldo_id++;
+	}
 }
+
 void pmic_print_info(void)
 {	
 	uint8_t pmic_id;
@@ -864,6 +971,7 @@ void pmic_init(void)
 	u8 pmic_id;
 
 	IIC0_ESetport();
+	IIC1_ESetport();
 #if 0
 	/* read ID */
 	IIC0_ERead(MAX8997_ADDR, 0, &pmic_id);

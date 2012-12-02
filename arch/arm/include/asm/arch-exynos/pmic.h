@@ -114,9 +114,7 @@ typedef enum
 	PMIC_BUCK2,
 	PMIC_BUCK3,
 	PMIC_BUCK4,
-	PMIC_LDO14,
-	PMIC_LDO10,
-	PMIC_LDO21,
+	PMIC_BUCK5,
 }PMIC_RegNum;
 
 extern void pmic_init(void);
