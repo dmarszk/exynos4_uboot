@@ -28,8 +28,6 @@
 
 #include <asm/arch/gpio.h>
 #include <asm/arch/i2c.h>
-/* Yes, ugly hax - don't ask. */
-#include "../../../../../board/samsung/smdk4212/smdk4412_val.h"
 
 /*
 	Macro
@@ -76,7 +74,7 @@ bool I2C_InitIp(I2C_CHANNEL eCh, unsigned int nOpClock, unsigned int nTimeOut)
 	//MOUTGDL = SCLKMPLL
 	divgdl = ((readl(ELFIN_CLOCK_BASE+CLK_DIV_LEFTBUS_OFFSET)) & 0x7) + 1; //MOUTGPL = ACLK_GDL = MOUTGDL/(GDL_RATIO + 1)
 	divgpl = ((readl(ELFIN_CLOCK_BASE+CLK_DIV_LEFTBUS_OFFSET) >> 4) & 0x7) + 1; //ACLK_GPL = MOUTGPL/(GPL_RATIO + 1)
-	nPclk = (MPLL_DEC/divgdl)/divgpl;
+	nPclk = (get_MPLL_CLK()/divgdl)/divgpl;
 
 	clk_gate = readl(CLK_GATE_IP_PERIL);
 	printf("[I2C] CLK_GATE_IP_PERIL: 0x%08X, enabling channel %d\n", clk_gate, eCh);
