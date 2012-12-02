@@ -220,6 +220,20 @@ void pmic_s5m8767_init(void)
 	uint8_t val;
 	int ldo_id;
 	int ldo_reg_id;
+	
+	IIC7_EWrite(S5M8767_ADDR, 0xE1, 0);
+	
+	IIC7_ERead(PMIC_RTC_ADDR, 0x18, &val);
+	IIC7_EWrite(PMIC_RTC_ADDR, 0x18, val | 0x20);
+	IIC7_EWrite(PMIC_RTC_ADDR, 0x1B, 0);
+	IIC7_EWrite(PMIC_RTC_ADDR, 0x18, val & 0xDF);
+	
+	
+	IIC7_ERead(S5M8767_ADDR, 0x31, &val);
+	val &= 0xF;
+	IIC7_EWrite(S5M8767_ADDR, 0x31, val);
+	
+	
 	cur_reg = pmic_s5m8767_init_data;
 	while(cur_reg->reg_id != 0xFF)
 	{
@@ -268,6 +282,8 @@ void pmic_s5m8767_init(void)
 		cur_ldo++;
 		ldo_id++;
 	}
+	
+	IIC7_EWrite(PMIC_RTC_ADDR, 0x1B, 0x80);
 }
 
 void pmic_print_info(void)
