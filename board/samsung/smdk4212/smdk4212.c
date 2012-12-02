@@ -38,7 +38,9 @@ unsigned int second_boot_info = 0xffffffff;
 int board_init(void)
 {
 	char bl1_version[9] = {0};
-
+	
+	GPIO_Init();
+	pmic_init();
 	pmic_print_info();
 	
 	/* display BL1 version */
@@ -195,7 +197,6 @@ int board_late_init (void)
 	*/
 
 #ifdef CONFIG_HKDK4412
-	GPIO_Init();
 	GPIO_SetFunctionEach(eGPIO_X2, eGPIO_2, eGPI);
 	GPIO_SetPullUpDownEach(eGPIO_X2, eGPIO_2, 1); 	// pull-down
 

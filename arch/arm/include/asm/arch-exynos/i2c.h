@@ -3,6 +3,19 @@
 
 typedef unsigned char	bool;
 
+#define EXYNOS4_PA_IIC(x)		(0x13860000 + ((x) * 0x10000))
+#define I2C0_BASE				EXYNOS4_PA_IIC(0)
+#define I2C1_BASE				EXYNOS4_PA_IIC(1)
+#define I2C2_BASE				EXYNOS4_PA_IIC(2)
+#define I2C3_BASE				EXYNOS4_PA_IIC(3)
+#define I2C4_BASE				EXYNOS4_PA_IIC(4)
+#define I2C5_BASE				EXYNOS4_PA_IIC(5)
+#define I2C6_BASE				EXYNOS4_PA_IIC(6)
+#define I2C7_BASE				EXYNOS4_PA_IIC(7)
+/* I2C8 = EXYNOS4_PA_IIC_HDMIPHY		0x138E0000 */
+#define I2C8_BASE				EXYNOS4_PA_IIC(8)
+
+
 /* Register Map */
 #define I2C_CON         0x00
 #define I2C_STAT        0x04

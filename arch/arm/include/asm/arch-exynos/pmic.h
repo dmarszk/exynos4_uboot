@@ -13,68 +13,6 @@
 #ifndef __PMIC_H__
 #define __PMIC_H__
 
-#define GPD1CON		*(volatile unsigned long *)(0x114000C0)
-#define GPD1DAT		*(volatile unsigned long *)(0x114000C4)
-#define GPD1PUD		*(volatile unsigned long *)(0x114000C8)
-#ifdef CONFIG_SMDKC220
-#define GPA1CON		*(volatile unsigned long *)(0x11400020)
-#define GPA1DAT		*(volatile unsigned long *)(0x11400024)
-#define GPA1PUD		*(volatile unsigned long *)(0x11400028)
-#endif
-
-#ifdef CONFIG_INVERSE_PMIC_I2C
-#define IIC0_ESCL_Hi	GPD1DAT |= (0x1<<0)
-#define IIC0_ESCL_Lo	GPD1DAT &= ~(0x1<<0)
-#define IIC0_ESDA_Hi	GPD1DAT |= (0x1<<1)
-#define IIC0_ESDA_Lo	GPD1DAT &= ~(0x1<<1)
-#else
-#define IIC0_ESCL_Hi	GPD1DAT |= (0x1<<1)
-#define IIC0_ESCL_Lo	GPD1DAT &= ~(0x1<<1)
-#define IIC0_ESDA_Hi	GPD1DAT |= (0x1<<0)
-#define IIC0_ESDA_Lo	GPD1DAT &= ~(0x1<<0)
-#endif
-
-#define IIC1_ESCL_Hi	GPD1DAT |= (0x1<<3)
-#define IIC1_ESCL_Lo	GPD1DAT &= ~(0x1<<3)
-#define IIC1_ESDA_Hi	GPD1DAT |= (0x1<<2)
-#define IIC1_ESDA_Lo	GPD1DAT &= ~(0x1<<2)
-
-#ifdef CONFIG_SMDKC220
-#define IIC3_ESCL_Hi	GPA1DAT |= (0x1<<3)
-#define IIC3_ESCL_Lo	GPA1DAT &= ~(0x1<<3)
-#define IIC3_ESDA_Hi	GPA1DAT |= (0x1<<2)
-#define IIC3_ESDA_Lo	GPA1DAT &= ~(0x1<<2)
-#endif
-
-#ifdef CONFIG_INVERSE_PMIC_I2C
-#define IIC0_ESCL_INP	GPD1CON &= ~(0xf<<0)
-#define IIC0_ESCL_OUTP	GPD1CON = (GPD1CON & ~(0xf<<0))|(0x1<<0)
-
-#define IIC0_ESDA_INP	GPD1CON &= ~(0xf<<4)
-#define IIC0_ESDA_OUTP	GPD1CON = (GPD1CON & ~(0xf<<4))|(0x1<<4)
-#else
-#define IIC0_ESCL_INP	GPD1CON &= ~(0xf<<4)
-#define IIC0_ESCL_OUTP	GPD1CON = (GPD1CON & ~(0xf<<4))|(0x1<<4)
-
-#define IIC0_ESDA_INP	GPD1CON &= ~(0xf<<0)
-#define IIC0_ESDA_OUTP	GPD1CON = (GPD1CON & ~(0xf<<0))|(0x1<<0)
-#endif
-
-#define IIC1_ESCL_INP	GPD1CON &= ~(0xf<<12)
-#define IIC1_ESCL_OUTP	GPD1CON = (GPD1CON & ~(0xf<<12))|(0x1<<12)
-
-#define IIC1_ESDA_INP	GPD1CON &= ~(0xf<<8)
-#define IIC1_ESDA_OUTP	GPD1CON = (GPD1CON & ~(0xf<<8))|(0x1<<8)
-
-#ifdef CONFIG_SMDKC220
-#define IIC3_ESCL_INP	GPA1CON &= ~(0xf<<12)
-#define IIC3_ESCL_OUTP	GPA1CON = (GPA1CON & ~(0xf<<12))|(0x1<<12)
-
-#define IIC3_ESDA_INP	GPA1CON &= ~(0xf<<8)
-#define IIC3_ESDA_OUTP	GPA1CON = (GPA1CON & ~(0xf<<8))|(0x1<<8)
-#endif
-
-#define DELAY		100
 
 #define MAX8952_ADDR            0xc0	// VDD_ARM - I2C0
 #define MAX8649_ADDR            0xc0	// VDD_INT - I2C1

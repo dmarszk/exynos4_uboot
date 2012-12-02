@@ -73,12 +73,6 @@ lowlevel_init:
 	ldr r1, [r0]
 	orr r1, r1, #0xF
 	str r1, [r0]
-
-	/* During sleep/wakeup or AFTR mode, pmic_init function is not available 
-	 * and it causes delays. So except for sleep/wakeup and AFTR mode, 
-	 * the below function is needed 
-	 */
-	bl pmic_init
 	
 	bl uart_asm_init
 	

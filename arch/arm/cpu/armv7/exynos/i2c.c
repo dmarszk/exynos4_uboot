@@ -25,11 +25,11 @@
 *	- Modified by Jang TaeSu for S5PC210 (2010/04/11)
 *  
 **************************************************************************************/
-#include <s5pc210.h>
 
-#include "gpio.h"
-#include "i2c.h"
-#include "cmu.h"
+#include <asm/arch/gpio.h>
+#include <asm/arch/i2c.h>
+/* Yes, ugly hax - don't ask. */
+#include "../../../../../board/samsung/smdk4212/smdk4412_val.h"
 
 /*
 	Macro
@@ -66,14 +66,22 @@ static I2C_CONTEXT g_aI2c[] =
 	Public Function
 */
 #define TAG_PUBLIC_FUNCTION
-
+#define CLK_GATE_IP_PERIL (ELFIN_CLOCK_BASE + 0xC950)
 bool I2C_InitIp(I2C_CHANNEL eCh, unsigned int nOpClock, unsigned int nTimeOut)
 {
 	I2C_PRESCALER ePrescaler;
 	unsigned int nPclk, nPrescaler;
+	uint32_t divgdl, divgpl;
+	uint32_t clk_gate;
+	//MOUTGDL = SCLKMPLL
+	divgdl = ((readl(ELFIN_CLOCK_BASE+CLK_DIV_LEFTBUS_OFFSET)) & 0x7) + 1; //MOUTGPL = ACLK_GDL = MOUTGDL/(GDL_RATIO + 1)
+	divgpl = ((readl(ELFIN_CLOCK_BASE+CLK_DIV_LEFTBUS_OFFSET) >> 4) & 0x7) + 1; //ACLK_GPL = MOUTGPL/(GPL_RATIO + 1)
+	nPclk = (MPLL_DEC/divgdl)/divgpl;
 
-	nPclk = SYSC_GetClkFreq(SYSC_ACLK_GPL);
-
+	clk_gate = readl(CLK_GATE_IP_PERIL);
+	printf("[I2C] CLK_GATE_IP_PERIL: 0x%08X, enabling channel %d\n", clk_gate, eCh);
+	clk_gate |= (1 << (eCh + 6));
+	writel(clk_gate, CLK_GATE_IP_PERIL);
 	if (!I2C_CalculatePrescaler(nPclk, nOpClock, &ePrescaler, &nPrescaler))
 	{
 		g_aI2c[eCh].eError = I2C_INVALID_TX_CLOCK;
@@ -85,6 +93,8 @@ bool I2C_InitIp(I2C_CHANNEL eCh, unsigned int nOpClock, unsigned int nTimeOut)
 	g_aI2c[eCh].nPrescaler = nPrescaler;
 	g_aI2c[eCh].nTimeOut = nTimeOut;
 	g_aI2c[eCh].eError = I2C_SUCCESS;
+	printf("[I2C] channel %d initialised with freq %d and timeout %d.\n", eCh, nOpClock, nTimeOut);
+	printf("[I2C] ePrescaler: %d nPrescaler: %d.\n", ePrescaler, nPrescaler);
 
 	return TRUE;
 }
@@ -103,6 +113,7 @@ static bool I2C_SendForGeneral(I2C_CHANNEL eCh, u8 ucSlvAddr, u8 aAddr[], unsign
 	//
 	// I2C Phase - Check BUS Status
 	//
+	printf("%s: ch%d Waiting for bus ready...\n", __func__, eCh);
 	if (I2C_WaitForBusReady(eCh, g_aI2c[eCh].nTimeOut) == FALSE)
 	{
 		g_aI2c[eCh].eError = I2C_TIMEOUT_BUS_READY_START;
@@ -114,11 +125,17 @@ static bool I2C_SendForGeneral(I2C_CHANNEL eCh, u8 ucSlvAddr, u8 aAddr[], unsign
 	//
 	// I2C Phase - START
 	//
+	
+	printf("%s: ch%d setting mode...\n", __func__, eCh);
 	I2C_SetMode(eCh, MASTER_TX_MODE);		// Set Mode
+	printf("%s: ch%d writting addr...\n", __func__, eCh);
 	I2C_WriteAddress(eCh, ucSlvAddr);		// Write Slave Address
+	printf("%s: ch%d generating START...\n", __func__, eCh);
 	I2C_GenerateSignal(eCh, START_CONDITION);	// Send START Signal
 
 	udelay(10);
+	
+	printf("%s: ch%d waiting for ACK...\n", __func__, eCh);
 	if (I2C_WaitForXferAck(eCh, g_aI2c[eCh].nTimeOut) == FALSE)
 	{
 		g_aI2c[eCh].eError = I2C_TIMEOUT_SLAVE_ADDRESS;
@@ -650,6 +667,14 @@ void I2C_PrintErrorCase(I2C_ERROR eError)
 		case I2C_TIMEOUT_BUS_READY_STOP:
 			printf("\n[I2C->ERR] BUS Stop Status\n");
 			break;
+			
+		case I2C_INVALID_ADDRESS:
+			printf("\n[I2C->ERR] Invalid address\n");
+			break;
+			
+		case I2C_SUCCESS:
+			break;
+		
 	}
 }
 
