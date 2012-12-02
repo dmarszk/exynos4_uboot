@@ -230,7 +230,7 @@ void pmic_s5m8767_init(void)
 	
 	
 	IIC7_ERead(S5M8767_ADDR, 0x31, &val);
-	val &= 0xF;
+	val |= 0xF0;
 	IIC7_EWrite(S5M8767_ADDR, 0x31, val);
 	
 	
