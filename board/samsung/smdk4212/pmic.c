@@ -243,12 +243,15 @@ void pmic_s5m8767_init(void)
 		else
 			ldo_reg_id = ldo_id + 92;
 			
-		if(cur_ldo->en1 == cur_ldo->en2) {		
-			printf("%s set LDO%d to V %d\n", __func__, ldo_id+1, cur_ldo->voltage);
-			if(is_ldo_1_2_6_7_8_15(ldo_id))
-				pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_LDO1267815_VOLT(cur_ldo->voltage), 0x3F);
-			else				
-				pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_ALL_LDO_VOLT(cur_ldo->voltage), 0x3F);
+		if(cur_ldo->en1 == cur_ldo->en2) {
+			if(cur_ldo->voltage)
+			{
+				printf("%s set LDO%d to V %d\n", __func__, ldo_id+1, cur_ldo->voltage);
+				if(is_ldo_1_2_6_7_8_15(ldo_id))
+					pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_LDO1267815_VOLT(cur_ldo->voltage), 0x3F);
+				else				
+					pmic_s5m8767_update_reg(ldo_reg_id, CALC_S5M8767_ALL_LDO_VOLT(cur_ldo->voltage), 0x3F);
+			}
 		}
 		else if(cur_ldo->voltage) {
 		
