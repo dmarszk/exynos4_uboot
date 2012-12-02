@@ -113,7 +113,6 @@ static bool I2C_SendForGeneral(I2C_CHANNEL eCh, u8 ucSlvAddr, u8 aAddr[], unsign
 	//
 	// I2C Phase - Check BUS Status
 	//
-	printf("%s: ch%d Waiting for bus ready...\n", __func__, eCh);
 	if (I2C_WaitForBusReady(eCh, g_aI2c[eCh].nTimeOut) == FALSE)
 	{
 		g_aI2c[eCh].eError = I2C_TIMEOUT_BUS_READY_START;
@@ -126,16 +125,12 @@ static bool I2C_SendForGeneral(I2C_CHANNEL eCh, u8 ucSlvAddr, u8 aAddr[], unsign
 	// I2C Phase - START
 	//
 	
-	printf("%s: ch%d setting mode...\n", __func__, eCh);
 	I2C_SetMode(eCh, MASTER_TX_MODE);		// Set Mode
-	printf("%s: ch%d writting addr...\n", __func__, eCh);
 	I2C_WriteAddress(eCh, ucSlvAddr);		// Write Slave Address
-	printf("%s: ch%d generating START...\n", __func__, eCh);
 	I2C_GenerateSignal(eCh, START_CONDITION);	// Send START Signal
 
 	udelay(10);
 	
-	printf("%s: ch%d waiting for ACK...\n", __func__, eCh);
 	if (I2C_WaitForXferAck(eCh, g_aI2c[eCh].nTimeOut) == FALSE)
 	{
 		g_aI2c[eCh].eError = I2C_TIMEOUT_SLAVE_ADDRESS;
