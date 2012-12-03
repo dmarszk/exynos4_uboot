@@ -49,6 +49,7 @@ ifndef CONFIG_EXYNOS4_GALAXY
 COBJS	+= pmic.o
 else
 COBJS	+= i2c.o
+COBJS	+= i2c_gpio.o
 endif
 endif
 endif
