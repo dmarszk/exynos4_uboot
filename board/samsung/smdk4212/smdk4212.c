@@ -41,7 +41,6 @@ int board_init(void)
 	
 	GPIO_Init();
 	pmic_init();
-	pmic_print_info();
 	
 	/* display BL1 version */
 #ifdef CONFIG_TRUSTZONE

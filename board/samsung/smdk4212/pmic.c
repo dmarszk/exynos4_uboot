@@ -17,6 +17,7 @@
 #include "max77693.h"
 
 int max77693_handle = -1;
+int s5m8767_handle = -1;
 
 void IIC7_ERead(unsigned char ChipId, unsigned char IicAddr, unsigned char* IicData)
 {
@@ -315,13 +316,16 @@ void charger_max77693_init(void)
 	}
 	
 	i2c_gpio_read_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_PMIC_REG_PMIC_ID2, &pmic_id);
-	//pmic_id &= 0x7;
 
 	if ((pmic_id & 0x7) <= 0 )
 		printf("max77693 charger PMIC rev = PASS1, REG_ID2: 0x%X\n", pmic_id);
 	else
 		printf("max77693 charger PMIC rev = PASS2, REG_ID2: 0x%X\n", pmic_id);
-  return 0;
+	
+	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_CHG_REG_CHG_CNFG_00, 0x4);	
+	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_CHG_REG_CHG_CNFG_09, 0x19);	
+	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_PMIC_REG_LSCNFG, 0x2A);
+	
 }
 void pmic_init(void)
 {
@@ -334,7 +338,7 @@ void pmic_init(void)
 	} else {
 		pmic_max77686_init();
 	}
-
+	pmic_print_info();
 	charger_max77693_init();
 	
 }
