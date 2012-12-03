@@ -73,3 +73,10 @@ cscope.*
 /onenand_ipl/onenand-ipl*
 /onenand_ipl/board/*/onenand*
 /onenand_ipl/board/*/*.S
+
+# Qt-Creator files
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes

@@ -34,9 +34,6 @@ lowlevel_init:
 	ldr	sp, =0x02060000
 	push {lr}
 
-	/* check reset status  */
-	ldr     r0, =(INF_REG_BASE + INF_REG1_OFFSET)
-	ldr     r1, [r0]
 	
 	ldr r0, =0x10500054
 	ldr r1, [r0]
@@ -50,6 +47,10 @@ lowlevel_init:
 	/* S5P_CMU_SYSCLK_ISP_SYS */
 	ldr r0, =0x100213B8
 	str r1, [r0]
+
+	/* check reset status  */
+	ldr     r0, =(INF_REG_BASE + INF_REG1_OFFSET)
+	ldr     r1, [r0]
 	
 	/* Sleep wakeup reset */
 	ldr	r2, =S5P_CHECK_SLEEP
