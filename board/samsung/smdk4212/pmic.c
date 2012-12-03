@@ -318,9 +318,9 @@ void charger_max77693_init(void)
 	//pmic_id &= 0x7;
 
 	if ((pmic_id & 0x7) <= 0 )
-		printf("max77693 charger PMIC rev = PASS1, idd: %d\n", pmic_id);
+		printf("max77693 charger PMIC rev = PASS1, id2: 0x%X\n", pmic_id);
 	else
-		printf("max77693 charger PMIC rev = PASS2, id2: %d\n", pmic_id);
+		printf("max77693 charger PMIC rev = PASS2, id2: 0x%X\n", pmic_id);
   return 0;
 }
 void pmic_init(void)
