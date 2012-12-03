@@ -17,8 +17,8 @@
 
 
 
-#define	DELAY_TIME				100
-#define	PORT_CHANGE_DELAY_TIME	100
+#define	DELAY_TIME				1000
+#define	PORT_CHANGE_DELAY_TIME	1000
 
 
 #define	HIGH					1

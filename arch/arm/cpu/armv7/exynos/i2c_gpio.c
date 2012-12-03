@@ -27,6 +27,7 @@ struct i2c_gpio_port
 	enum GPIO_BitPos scl_pin;
 };
 #define MAX_I2C_GPIO_PORTS 10
+
 static struct i2c_gpio_port ports[MAX_I2C_GPIO_PORTS];
 
 static	void			delay_func					(unsigned int us);
@@ -58,6 +59,8 @@ int i2c_gpio_new_port(	enum GPIO_Id sda_port, enum GPIO_BitPos sda_pin,
 	ports[new_port_id].scl_pin = scl_pin;
 	ports[new_port_id].sda_port = sda_port;
 	ports[new_port_id].sda_pin = sda_pin;
+	GPIO_SetPullUpDownEach(scl_port, scl_pin, GPIO_PULL_NONE);
+	GPIO_SetPullUpDownEach(sda_port, sda_pin, GPIO_PULL_NONE);
 	return new_port_id++;
 }
 
@@ -70,12 +73,18 @@ int i2c_gpio_write_reg(int port, uint8_t slave_addr, uint8_t reg, uint8_t val)
 	i2c_gpio_write(port, slave_addr & 0xFE);	// I2C WRITE mask
 
 	if((ack = i2c_gpio_chk_ack(port)))
+	{
+		printf("%s: no addr ack\n", __func__);
 		goto write_stop;
+	}
 	
 	i2c_gpio_write(port, reg);
 	
-	if((ack = i2c_gpio_chk_ack(port)))	
+	if((ack = i2c_gpio_chk_ack(port)))
+	{
+		printf("%s: no data ack\n", __func__);
 		goto write_stop;	
+	}
 	i2c_gpio_write(port, val);
 	ack = i2c_gpio_chk_ack(port);
 
@@ -87,24 +96,30 @@ write_stop:
 int i2c_gpio_read_reg(int port, uint8_t slave_addr, uint8_t reg, uint8_t* val)
 {
 	unsigned char ack;
+	(*val) = 0;
 
 	i2c_gpio_start(port);
 	
 	i2c_gpio_write(port, slave_addr & 0xFE);	// I2C WRITE mask
 
 	if((ack = i2c_gpio_chk_ack(port)))
+	{
+		printf("%s: no addr ack\n", __func__);
 		goto read_stop;
+	}
 	
 	i2c_gpio_write(port, reg);	
-	
-	i2c_gpio_stop(port);
+
 	// Restart
 	i2c_gpio_start(port);
 	
 	i2c_gpio_write(port, slave_addr | 0x1);	// I2C READ flag
 
 	if((ack = i2c_gpio_chk_ack(port)))
+	{
+		printf("%s: no data ack\n", __func__);
 		goto read_stop;
+	}
 
 	i2c_gpio_read(port, val);
 	i2c_gpio_send_noack(port);
@@ -181,13 +196,13 @@ static void i2c_gpio_start(int port)
 {
 	// Setup SDA, CLK output High
 	i2c_gpio_set_sda(port, HIGH);
-	i2c_gpio_set_clk(port, HIGH);
-	
+	i2c_gpio_set_clk(port, HIGH);	
 	delay_func(DELAY_TIME);
-
 	// SDA low before CLK low
-	i2c_gpio_set_sda(port, LOW);	delay_func(DELAY_TIME);
-	i2c_gpio_set_clk(port, LOW);	delay_func(DELAY_TIME);
+	i2c_gpio_set_sda(port, LOW);
+	delay_func(DELAY_TIME);
+	i2c_gpio_set_clk(port, LOW);
+	delay_func(DELAY_TIME);
 }
 
 static void i2c_gpio_stop(int port)
@@ -199,8 +214,10 @@ static void i2c_gpio_stop(int port)
 	delay_func(DELAY_TIME);
 	
 	// SDA high after CLK high
-	i2c_gpio_set_clk(port, HIGH);	delay_func(DELAY_TIME);
-	i2c_gpio_set_sda(port, HIGH);	delay_func(DELAY_TIME);
+	i2c_gpio_set_clk(port, HIGH);
+	delay_func(DELAY_TIME);
+	i2c_gpio_set_sda(port, HIGH);
+	delay_func(DELAY_TIME);
 }
 
 static	void i2c_gpio_send_ack (int port)
@@ -230,7 +247,7 @@ static unsigned char i2c_gpio_chk_ack (int port)
 	delay_func(PORT_CHANGE_DELAY_TIME);
 
 	while(i2c_gpio_get_sda(port))	{
-		if(count++ > 100){
+		if(count++ > 10000){
 			ret = 1;
 			break;
 		}
@@ -241,10 +258,8 @@ static unsigned char i2c_gpio_chk_ack (int port)
 	i2c_gpio_set_clk(port, LOW);
 	delay_func(DELAY_TIME);
 	
-	#if defined(DEBUG_GPIO_I2C)
-		if(ret)		DEBUG_MSG(("%s (%d): no ack!!\n",__FUNCTION__, ret));
-		else		DEBUG_MSG(("%s (%d): ack !! \n" ,__FUNCTION__, ret));
-	#endif
+	if(ret)
+		printf("%s: virtual channel %d no ack!!\n", __func__, port);
 
 	return ret;
 }
