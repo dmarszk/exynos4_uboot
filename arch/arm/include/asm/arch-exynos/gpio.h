@@ -45,28 +45,51 @@ typedef enum GPIO_Id	// Address Offset
 {                                                                            
 									// GPIO Base Addr = 0x1100_0000      
 	// GPIO_Right_Top_Block							
+#ifdef CONFIG_SMDKC220	
+/* In Exynos4x12 these has been moved to the Left-Top part */
+	eGPIO_J0 = 0x400240,                      
+	eGPIO_J1 = 0x400260,
+#else
 	eGPIO_J0 = 0x000,    		// offset : 0x0                         
-	eGPIO_J1 = 0x020,    		                                     
+	eGPIO_J1 = 0x020,
+#endif	
 	eGPIO_K0 = 0x040,    		                                     
 	eGPIO_K1 = 0x060,    		                                     
 	eGPIO_K2 = 0x080,    		                                     
 	eGPIO_K3 = 0x0A0,    		                                     
 	eGPIO_L0 = 0x0C0,    		                                     
 	eGPIO_L1 = 0x0E0,    		                                     
-	eGPIO_L2 = 0x100,    		                                     
+	eGPIO_L2 = 0x100,    				
+#ifdef CONFIG_SMDKC220		                                     
+	eGPIO_PY0 = 0x120,    	                                     
+	eGPIO_PY1 = 0x140,    	                                     
+	eGPIO_PY2 = 0x160,    	                                     
+	eGPIO_PY3 = 0x180,    	                                     
+	eGPIO_PY4 = 0x1A0,    	                                     
+	eGPIO_PY5 = 0x1C0,    	                                     
+	eGPIO_PY6 = 0x1E0, 
+#else		                                     
 	eGPIO_MP0_0 = 0x120,    	                                     
 	eGPIO_MP0_1 = 0x140,    	                                     
 	eGPIO_MP0_2 = 0x160,    	                                     
 	eGPIO_MP0_3 = 0x180,    	                                     
 	eGPIO_MP0_4 = 0x1A0,    	                                     
 	eGPIO_MP0_5 = 0x1C0,    	                                     
-	eGPIO_MP0_6 = 0x1E0,    	                                     
+	eGPIO_MP0_6 = 0x1E0,  
+#endif	  		                                     
+   	eETC0    = 0x208,    		                                     
+	eETC6    = 0x228, 
+#ifdef CONFIG_SMDKC220     	                                     
+	eGPIO_M0 = 0x260,    	                                     
+	eGPIO_M1 = 0x280,    	                                     
+	eGPIO_M2 = 0x2A0,    	                                     
+	eGPIO_M3 = 0x1C0,    	                                     
+	eGPIO_M4 = 0x1E0, 
+#endif	
 	eGPIO_X0 = 0xC00,    		                                     
 	eGPIO_X1 = 0xC20,    		                                     
 	eGPIO_X2 = 0xC40,    		                                     
-	eGPIO_X3 = 0xC60,    		                                     
-   	eETC6    = 0x208,    		                                     
-	eETC8    = 0x228,    		                                     
+	eGPIO_X3 = 0xC60,  		                                     
 	                                                                     
 	// GPIO_Left_Bottom_Block	                                     
 	eGPIO_A0 = 0x400000,    	// offset : 0x40_0000	             
@@ -75,19 +98,22 @@ typedef enum GPIO_Id	// Address Offset
 	eGPIO_C0 = 0x400060,    	                                     
 	eGPIO_C1 = 0x400080,    	                                     
 	eGPIO_D0 = 0x4000A0,    	                                     
-	eGPIO_D1 = 0x4000C0,    	                                     
+	eGPIO_D1 = 0x4000C0, 
+#ifndef CONFIG_SMDKC220    	
 	eGPIO_E0 = 0x4000E0,    	                                     
 	eGPIO_E1 = 0x400100,    	                                     
 	eGPIO_E2 = 0x400120,    	                                     
 	eGPIO_E3 = 0x400140,    	                                     
-	eGPIO_E4 = 0x400160,    	                                     
+	eGPIO_E4 = 0x400160,  
+#endif	
 	eGPIO_F0 = 0x400180,    	                                     
 	eGPIO_F1 = 0x4001A0,    	                                     
 	eGPIO_F2 = 0x4001C0,    	                                     
-	eGPIO_F3 = 0x4001E0,    	                                     
-	eETC0    = 0x400208,    	                                     
-	eETC1    = 0x400228    	                                     
-	                                                                     
+	eGPIO_F3 = 0x4001E0,
+#ifndef CONFIG_SMDKC220        	                                     
+	eETC0    = 0x400208,  
+#endif	
+	eETC1    = 0x400228,
 }                                                                            
 GPIO_eId;                                                                    
 
@@ -150,9 +176,6 @@ typedef enum GPIO_PUD
 	eGPRes		= 2	// reserved
 } GPIO_ePUD;
 
-
-
-
 typedef enum FLT_TYPE
 {
 	eDisFLT	= 0x0,		// Digital Fiter Off (EINT Group 1~16, 21~29 )
@@ -166,66 +189,7 @@ typedef enum PRI_TYPE
 	eFixed	= 0x0
 	//eRotate	=  0x1, 		// Spec Out
 } PRI_eTYPE;
-
-// use by Design Team : GPIO in/out L4SIM Test Code & Silicon Aging Ttest :  Write by Siyoung Kim : 2010.04.16
-typedef enum GPIO_PadNum                                                         
-{                                                                            
-         //General  PADs							              // Group_Num		//Pad_Num        
-         eGPIOA0PAD_Num = (0x00010008),		//0x0001*1000 		//0008
-         eGPIOA1PAD_Num = (0x00020006),		//0x0002*1000 		//0006
-         eGPIOBPAD_Num 	= (0x00030008),		//0x0003*1000		//0008
-         eGPIOC0PAD_Num = (0x00040005),		//0x0004*1000		//0005
-         eGPIOC1PAD_Num = (0x00050005),		//0x0005*1000		//0005
-         eGPIOD0PAD_Num = (0x00060004),		//0x0006*1000		//0004
-         eGPIOD1PAD_Num = (0x00070004),		//0x0007*1000		//0004
-         eGPIOE0PAD_Num = (0x00080005),		//0x0008*1000		//0005
-         eGPIOE1PAD_Num = (0x00090008),		//0x0009*1000		//0008
-         eGPIOE2PAD_Num = (0x000A0006),		//0x000A*1000		//0006
-         eGPIOE3PAD_Num = (0x000B0008),		//0x000B*1000		//0008
-         eGPIOE4PAD_Num = (0x000C0008),		//0x000C*1000		//0008
-         eGPIOF0PAD_Num = (0x000D0008),		//0x000D*1000		//0008
-         eGPIOF1PAD_Num = (0x000E0008),		//0x000E*1000		//0008
-         eGPIOF2PAD_Num = (0x000F0008),		//0x000F*1000		//0008
-         eGPIOF3PAD_Num = (0x00100006),		//0x0010*1000		//0006
-         eGPIOJ0PAD_Num = (0x00110008),		//0x0011*1000		//0008
-         eGPIOJ1PAD_Num = (0x00120005),		//0x0012*1000		//0005
-         eGPIOK0PAD_Num = (0x00130007),		//0x0013*1000		//0007
-         eGPIOK1PAD_Num = (0x00140007),		//0x0014*1000		//0007
-         eGPIOK2PAD_Num = (0x00150007),		//0x0015*1000		//0007
-         eGPIOK3PAD_Num = (0x00160007),		//0x0016*1000		//0007
-         eGPIOL0PAD_Num = (0x00170008),		//0x0017*1000		//0008
-         eGPIOL1PAD_Num = (0x00180003),		//0x0018*1000		//0003
-         eGPIOL2PAD_Num = (0x00190008),		//0x0019*1000		//0008
-         eGPIOX0PAD_Num = (0x001A0008),		//0x001A*1000		//0008
-         eGPIOX1PAD_Num = (0x001B0008),		//0x001B*1000		//0008
-         eGPIOX2PAD_Num = (0x001C0008),		//0x001C*1000		//0008
-         eGPIOX3PAD_Num = (0x001D0008),		//0x001D*1000		//0008
-         eGPIOMP0PAD_Num        = (0x001E0006),		//0x001E*1000		//0006
-         eGPIOMP1PAD_Num        = (0x001F0004),		//0x001F*1000		//0004
-         eGPIOMP2PAD_Num 	= (0x00200006),		//0x0020*1000		//0006
-         eGPIOMP3PAD_Num 	= (0x00210008),		//0x0021*1000		//0008
-         eGPIOMP4PAD_Num 	= (0x00220008),		//0x0022*1000		//0008
-         eGPIOMP5PAD_Num 	= (0x00230008),		//0x0023*1000		//0008
-         eGPIOMP6PAD_Num 	= (0x00240008),		//0x0024*1000		//0008
-                                                	    				     	      
-         //Special  PADs                        	    				     	      
-         //eGPIOETC0PAD_Num 	= (0x00250006),		//0x0025*1000		//0006
-         //eGPIOETC1PAD_Num 	= (0x00260002),		//0x0026*1000		//0002
-         //eGPIOETC6PAD_Num 	= (0x00270008),		//0x0027*1000		//0008
-         //eGPIOETC8PAD_Num 	= (0x00280002),		//0x0028*1000		//0002
-
-         //General  PADs	Numbers
-         eGPIOGENERALPAD_Nums	= (245),
-
-         //Special  PADs Numbers
-         eGPI0SPECIALPAD_Nums	= (18),         
-
-         //Total  PADs Numbers
-         eGPIOTOTALPAD_Nums 	= (263) 
- 
-}                                                                            
-GPIO_ePadNum;          
-
+        
 
 void GPIO_Init(void);
 void GPIO_SetFunctionEach(GPIO_eId Id, GPIO_eBitPos eBitPos, int uFunction);
@@ -288,6 +252,8 @@ void GPIO_EINT7Mask(int uEINT_No );
 
 
 
+#ifndef CONFIG_SMDKC220
+
 void GPIO_SetEint8(int uEINT_No , int uIntType, FLT_eTYPE eFltType,  int uFltWidth);
 void GPIO_EINT8ClrPend(int uEINT_No );
 void GPIO_EINT8UnMask(int uEINT_No );
@@ -318,6 +284,7 @@ void GPIO_EINT12ClrPend(int uEINT_No );
 void GPIO_EINT12UnMask(int uEINT_No );
 void GPIO_EINT12Mask(int uEINT_No );
 
+#endif
 
 void GPIO_SetEint13(int uEINT_No , int uIntType, FLT_eTYPE eFltType,  int uFltWidth);
 void GPIO_EINT13ClrPend(int uEINT_No );

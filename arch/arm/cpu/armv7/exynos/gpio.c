@@ -1967,6 +1967,7 @@ void GPIO_EINT7Mask(int uEINT_No )
 
 
 
+#ifndef CONFIG_SMDKC220
 
 //////////
 // Function Name : GPIO_SetEint8
@@ -2681,6 +2682,7 @@ void GPIO_EINT12Mask(int uEINT_No )
 
 }
 
+#endif
 
 
 //////////
