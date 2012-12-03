@@ -37,42 +37,33 @@ lowlevel_init:
 	/* check reset status  */
 	ldr     r0, =(INF_REG_BASE + INF_REG1_OFFSET)
 	ldr     r1, [r0]
-
-	/* Sleep wakeup reset */
-	ldr	r2, =S5P_CHECK_SLEEP
-	cmp	r1, r2
-	beq	wakeup_reset
-
-	/* PS-Hold high */
-	ldr	r0, =0x1002330c
-	ldr	r1, [r0]
-	orr	r1, r1, #0x300
-	str	r1, [r0]
-
-	/* set CP reset to low */
-	ldr	r0, =0x11000C60
-	ldr	r1, [r0]
-	ldr	r2, =0xFFFFFF0F
-	and	r1, r1, r2
-	orr	r1, r1, #0x10
-	str	r1, [r0]
-	ldr	r0, =0x11000C68
-	ldr	r1, [r0]
-	ldr	r2, =0xFFFFFFF3
-	and	r1, r1, r2
-	orr	r1, r1, #0x4
-	str	r1, [r0]
-	ldr	r0, =0x11000C64
-	ldr	r1, [r0]
-	ldr	r2, =0xFFFFFFFD
-	and	r1, r1, r2
-	str	r1, [r0]
-	
 	
 	ldr r0, =0x10500054
 	ldr r1, [r0]
 	orr r1, r1, #0xF
 	str r1, [r0]
+	
+	mov r1, #0	
+	/* S5P_CMU_RESET_ISP_SYS */   
+	ldr r0, =0x10021174
+	str r1, [r0]
+	/* S5P_CMU_SYSCLK_ISP_SYS */
+	ldr r0, =0x100213B8
+	str r1, [r0]
+	
+	/* Sleep wakeup reset */
+	ldr	r2, =S5P_CHECK_SLEEP
+	cmp	r1, r2
+	beq	wakeup_reset	
+
+	
+	/* PS-Hold high */
+	ldr	r0, =0x1002330c
+	ldr	r1, [r0]
+	orr	r1, r1, #0x300
+	str	r1, [r0]
+	
+
 	
 	bl uart_asm_init
 	
@@ -136,6 +127,7 @@ v310_1:
 
 after_copy:
 
+#if 0
 #ifdef CONFIG_SMDKC220
 	/* set up C2C */	
 	ldr r0, =S5PV310_SYSREG_BASE
@@ -144,6 +136,7 @@ after_copy:
 	ldr r3, =0x4000
 	orr r1, r1, r3
 	str r1, [r0, r2]
+#endif
 #endif
 
 #ifdef CONFIG_ENABLE_MMU
@@ -166,9 +159,14 @@ after_copy:
 	ldr r0, _second_boot_info
 	str r1, [r0]
 
-	/* Print 'K' */
 	ldr	r0, =S5PV310_UART_CONSOLE_BASE
-	ldr	r1, =0x4b4b4b4b
+	mov	r1, #'B'
+	str	r1, [r0, #UTXH_OFFSET]
+	mov	r1, #'L'
+	str	r1, [r0, #UTXH_OFFSET]
+	mov	r1, #'2'
+	str	r1, [r0, #UTXH_OFFSET]
+	mov	r1, #0xa
 	str	r1, [r0, #UTXH_OFFSET]
 
 	ldr r0, _board_init_f
