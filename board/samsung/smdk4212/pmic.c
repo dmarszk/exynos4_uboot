@@ -12,8 +12,11 @@
 
 #include <common.h>
 #include <asm/arch/pmic.h>
+#include <asm/arch/gpio.h>
 #include <asm/arch/i2c.h>
+#include "max77693.h"
 
+int max77693_handle = -1;
 
 void IIC7_ERead(unsigned char ChipId, unsigned char IicAddr, unsigned char* IicData)
 {
@@ -302,12 +305,28 @@ void pmic_print_info(void)
 	}
 }
 
+void charger_max77693_init(void)
+{	
+	uint8_t pmic_id;
+	max77693_handle = i2c_gpio_new_port(eGPIO_M2, eGPIO_0, eGPIO_M2, eGPIO_1);
+	if(max77693_handle < 0)
+	{
+		printf("Error in I2C_GPIO max77693 init!\n");
+	}
+	
+	i2c_gpio_read_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_PMIC_REG_PMIC_ID2, &pmic_id);
+	//pmic_id &= 0x7;
+
+	if ((pmic_id & 0x7) <= 0 )
+		printf("max77693 charger PMIC rev = PASS1, idd: %d\n", pmic_id);
+	else
+		printf("max77693 charger PMIC rev = PASS2, id2: %d\n", pmic_id);
+  return 0;
+}
 void pmic_init(void)
 {
 	u8 pmic_id;
 	I2C_InitIp(7, 400*1000, 1000000);
-
-
 	/* read ID */
 	IIC7_ERead(S5M8767_ADDR, 0, &pmic_id);
 	if(pmic_id >= 0x0 && pmic_id <= 0x5) {
@@ -316,5 +335,7 @@ void pmic_init(void)
 		pmic_max77686_init();
 	}
 
+	charger_max77693_init();
+	
 	//GPA1PUD |= (0x5<<4);	// restore reset value: Pull Up/Down Enable SCL, SDA
 }
