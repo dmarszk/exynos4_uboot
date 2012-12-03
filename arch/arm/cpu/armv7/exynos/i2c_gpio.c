@@ -16,7 +16,7 @@
 #include <common.h>
 #include <asm/arch/i2c_gpio.h>
 #include <asm/arch/gpio.h>
-#define DEBUG
+#undef DEBUG
 
 static int new_port_id = 0;
 
@@ -137,7 +137,12 @@ int i2c_gpio_read_reg(int port, uint8_t slave_addr, uint8_t reg, uint8_t* val)
 		goto read_stop;
 	}
 	
-	i2c_gpio_write(port, reg);	
+	i2c_gpio_write(port, reg);		
+	if((ack = i2c_gpio_chk_ack(port)))
+	{
+		printf("%s: no reg_id ack\n", __func__);
+		goto read_stop;
+	}
 
 	// Restart
 	i2c_gpio_start(port);
