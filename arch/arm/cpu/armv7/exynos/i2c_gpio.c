@@ -31,8 +31,6 @@ struct i2c_gpio_port
 
 static struct i2c_gpio_port ports[MAX_I2C_GPIO_PORTS];
 
-static	void			delay_func					(unsigned int us);
-
 static	unsigned char	i2c_gpio_get_sda			(int port);
 static	void			i2c_gpio_set_sda			(int port, unsigned char hi_lo);
 static	void			i2c_gpio_set_clk			(int port, unsigned char hi_lo);
@@ -176,9 +174,9 @@ static void i2c_gpio_write(int port, uint8_t val)
 			i2c_gpio_set_sda(port, LOW);
 			
 		i2c_gpio_set_clk(port, HIGH);
-		delay_func(DELAY_TIME);
+		udelay(DELAY_TIME);
 		i2c_gpio_set_clk(port, LOW);
-		delay_func(DELAY_TIME);
+		udelay(DELAY_TIME);
 	}
 }
 
@@ -189,30 +187,19 @@ static void i2c_gpio_read(int port, uint8_t* val)
 	printf("%s\n", __func__);
 #endif	
 	GPIO_SetFunctionEach(ports[port].sda_port, ports[port].sda_pin, GPIO_INPUT);
-	delay_func(PORT_CHANGE_DELAY_TIME);
+	udelay(PORT_CHANGE_DELAY_TIME);
 
 	for(cnt = 0, mask = 0x80, *val = 0; cnt < 8; cnt++, mask >>= 1)	{
 		i2c_gpio_set_clk(port, HIGH);
-		delay_func(DELAY_TIME);
+		udelay(DELAY_TIME);
 		if(i2c_gpio_get_sda(port))
 			*val |= mask;
 		i2c_gpio_set_clk(port, LOW);
-		delay_func(DELAY_TIME);
+		udelay(DELAY_TIME);
 		
 	}
 	GPIO_SetFunctionEach(ports[port].sda_port, ports[port].sda_pin, GPIO_OUTPUT);
-	delay_func(PORT_CHANGE_DELAY_TIME);
-}
-
- 
-static void delay_func(unsigned int us)
-{
-	unsigned long i;
-
-	for(i = 0; i < us; i++){
-		i++;
-		i--;
-	}
+	udelay(PORT_CHANGE_DELAY_TIME);
 }
 
 static void i2c_gpio_start(int port)
@@ -223,12 +210,12 @@ static void i2c_gpio_start(int port)
 	// Setup SDA, CLK output High
 	i2c_gpio_set_sda(port, HIGH);
 	i2c_gpio_set_clk(port, HIGH);	
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 	// SDA low before CLK low
 	i2c_gpio_set_sda(port, LOW);
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 	i2c_gpio_set_clk(port, LOW);
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 }
 
 static void i2c_gpio_stop(int port)
@@ -240,13 +227,13 @@ static void i2c_gpio_stop(int port)
 	i2c_gpio_set_sda(port, LOW);
 	i2c_gpio_set_clk(port, LOW);
 	
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 	
 	// SDA high after CLK high
 	i2c_gpio_set_clk(port, HIGH);
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 	i2c_gpio_set_sda(port, HIGH);
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 }
 
 static	void i2c_gpio_send_ack (int port)
@@ -255,9 +242,9 @@ static	void i2c_gpio_send_ack (int port)
 	printf("%s\n", __func__);
 #endif
 	// SDA Low
-	i2c_gpio_set_sda(port, LOW);	delay_func(DELAY_TIME);
-	i2c_gpio_set_clk(port, HIGH);	delay_func(DELAY_TIME);
-	i2c_gpio_set_clk(port, LOW);	delay_func(DELAY_TIME);
+	i2c_gpio_set_sda(port, LOW);	udelay(DELAY_TIME);
+	i2c_gpio_set_clk(port, HIGH);	udelay(DELAY_TIME);
+	i2c_gpio_set_clk(port, LOW);	udelay(DELAY_TIME);
 }
 
 static void i2c_gpio_send_noack (int port)
@@ -266,9 +253,9 @@ static void i2c_gpio_send_noack (int port)
 	printf("%s\n", __func__);
 #endif
 	// SDA High
-	i2c_gpio_set_sda(port, HIGH);	delay_func(DELAY_TIME);
-	i2c_gpio_set_clk(port, HIGH);	delay_func(DELAY_TIME);
-	i2c_gpio_set_clk(port, LOW);	delay_func(DELAY_TIME);
+	i2c_gpio_set_sda(port, HIGH);	udelay(DELAY_TIME);
+	i2c_gpio_set_clk(port, HIGH);	udelay(DELAY_TIME);
+	i2c_gpio_set_clk(port, LOW);	udelay(DELAY_TIME);
 }
 
 static unsigned char i2c_gpio_chk_ack (int port)
@@ -278,11 +265,11 @@ static unsigned char i2c_gpio_chk_ack (int port)
 #endif
 	unsigned char count = 0, ret = 0;
 
-	i2c_gpio_set_sda(port, LOW);		delay_func(DELAY_TIME);
-	i2c_gpio_set_clk(port, HIGH);		delay_func(DELAY_TIME);
+	i2c_gpio_set_sda(port, LOW);		udelay(DELAY_TIME);
+	i2c_gpio_set_clk(port, HIGH);		udelay(DELAY_TIME);
 
 	GPIO_SetFunctionEach(ports[port].sda_port, ports[port].sda_pin, GPIO_INPUT);
-	delay_func(PORT_CHANGE_DELAY_TIME);
+	udelay(PORT_CHANGE_DELAY_TIME);
 
 	while(i2c_gpio_get_sda(port))	{
 		if(count++ > 10000){
@@ -290,13 +277,13 @@ static unsigned char i2c_gpio_chk_ack (int port)
 			break;
 		}
 		else
-			delay_func(DELAY_TIME);	
+			udelay(DELAY_TIME);	
 	}
 
 	i2c_gpio_set_clk(port, LOW);
-	delay_func(DELAY_TIME);
+	udelay(DELAY_TIME);
 	GPIO_SetFunctionEach(ports[port].sda_port, ports[port].sda_pin, GPIO_OUTPUT);
-	delay_func(PORT_CHANGE_DELAY_TIME);
+	udelay(PORT_CHANGE_DELAY_TIME);
 	
 	if(ret)
 		printf("%s: virtual channel %d no ack!!\n", __func__, port);

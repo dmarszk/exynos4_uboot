@@ -16,9 +16,9 @@
 #include <asm/arch/gpio.h>
 
 
-
-#define	DELAY_TIME				1000
-#define	PORT_CHANGE_DELAY_TIME	1000
+/* 1/100kHz = 10 us */
+#define	DELAY_TIME				10
+#define	PORT_CHANGE_DELAY_TIME	20
 
 
 #define	HIGH					1
