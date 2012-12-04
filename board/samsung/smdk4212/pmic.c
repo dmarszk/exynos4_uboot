@@ -182,38 +182,39 @@ struct pmic_s5m8767_init_reg_entry pmic_s5m8767_init_data[] = {
 	{0x5A, 0x58, 0},
 	{0x5B, 0xB4, 0},
 	{0xA, 0xE, 0xE},
+	{0x11, 0xE, 0},
 	{0xFF, 0xFF, 0}
 };
 struct pmic_s5m8767_init_ldo_val pmic_s5m8767_init_ldos[29] =
 {
-  { 0x3, 0x3, 0 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0x3, 0 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0, 0 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0x1, 0 },
-  { 0, 0, 1800 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0x1, 1950 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0, 0 },
-  { 0x3, 0x1, 1950 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0x1, 0 },
-  { 0x3, 0x3, 0 },
-  { 0, 0, 0 },
-  { 0, 0x1, 1800 },
-  { 0, 0, 3300 },
-  { 0, 0, 3300 },
-  { 0, 0, 2800 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 1500 },
-  { 0, 0, 0 },
+  { 0x3, 0x3, 0 },	//LDO1
+  { 0x3, 0x1, 0 },	//LDO2
+  { 0x3, 0x3, 0 },	//LDO3
+  { 0x3, 0x1, 0 },	//LDO4
+  { 0x3, 0, 0 },	//LDO5
+  { 0x3, 0x1, 0 },	//LDO6
+  { 0x3, 0x1, 0 },	//LDO7
+  { 0x3, 0x1, 0 },	//LDO8
+  { 0, 0, 1800 },	//LDO9
+  { 0x3, 0x1, 0 },	//LDO10
+  { 0x3, 0x1, 1950 },	//LDO11
+  { 0x3, 0x1, 0 },	//LDO12
+  { 0x3, 0, 0 },	//LDO13
+  { 0x3, 0x1, 1950 },	//LDO14
+  { 0x3, 0x1, 0 },	//LDO15
+  { 0x3, 0x1, 0 },	//LDO16
+  { 0x3, 0x3, 0 },	//LDO17
+  { 0, 0x1, 0 },	//LDO18
+  { 0, 0x1, 1800 },	//LDO19
+  { 0, 0, 3300 },	//LDO20
+  { 0, 0, 3300 },	//LDO21
+  { 0, 0, 2800 },	//LDO22
+  { 0, 0, 0 },	//LDO23
+  { 0, 0, 0 },	//LDO24
+  { 0, 0, 0 },	//LDO25
+  { 0, 0, 0 },	//LDO26
+  { 0, 0, 1500 },	//LDO27
+  { 0, 0, 0 },		//LDO28
   { 0xFF, 0xFF, 0 }
 };
 
@@ -325,6 +326,7 @@ void charger_max77693_init(void)
 	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_CHG_REG_CHG_CNFG_00, 0x4);	
 	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_CHG_REG_CHG_CNFG_09, 0x19);	
 	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_PMIC_REG_LSCNFG, 0x2A);
+	i2c_gpio_write_reg(max77693_handle, I2C_ADDR_MAX77693, MAX77693_PMIC_REG_MAINCTRL1, 0);
 	
 }
 void pmic_init(void)
