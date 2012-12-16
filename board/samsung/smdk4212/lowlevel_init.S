@@ -138,7 +138,7 @@ after_copy:
 	sub r0, r0, #4
 	ldr r1, [r0]
 	ldr r0, _dmc_density
-	str r1, [r0]
+//	str r1, [r0]
 #endif
 
 	/* store second boot information in u-boot C level variable */
@@ -146,7 +146,7 @@ after_copy:
 	sub r0, r0, #8
 	ldr r1, [r0]
 	ldr r0, _second_boot_info
-	str r1, [r0]
+//	str r1, [r0]
 
 	ldr	r0, =S5PV310_UART_CONSOLE_BASE
 	mov	r1, #'B'
@@ -158,7 +158,8 @@ after_copy:
 	mov	r1, #0xa
 	str	r1, [r0, #UTXH_OFFSET]
 
-	ldr r0, _board_init_f
+//	ldr r0, _board_init_f
+	ldr r0, =CONFIG_PHY_UBOOT_BASE
 	mov pc, r0
 	
 _board_init_f:
