@@ -128,18 +128,6 @@ v310_1:
 
 after_copy:
 
-#if 0
-#ifdef CONFIG_SMDKC220
-	/* set up C2C */	
-	ldr r0, =S5PV310_SYSREG_BASE
-	ldr r2, =GENERAL_CTRL_C2C_OFFSET
-	ldr r1, [r0, r2]
-	ldr r3, =0x4000
-	orr r1, r1, r3
-	str r1, [r0, r2]
-#endif
-#endif
-
 #ifdef CONFIG_ENABLE_MMU
 	bl enable_mmu
 #endif
