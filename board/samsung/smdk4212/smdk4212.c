@@ -44,10 +44,10 @@ int board_init(void)
 	
 	/* display BL1 version */
 #ifdef CONFIG_TRUSTZONE
-	printf("\nBL1 version: N/A (TrustZone Enabled BSP)\n");
+	printf("BL1 version: N/A (TrustZone Enabled BSP)\n");
 #else
 	strncpy(&bl1_version[0], (char *)0x02022fc8, 8);
-	printf("\nBL1 version: %s\n", &bl1_version[0]);
+	printf("BL1 version: %s\n", &bl1_version[0]);
 #endif
 
 #ifdef CONFIG_SMDKC220
@@ -62,17 +62,19 @@ int board_init(void)
 	gd->bd->bi_boot_params = (PHYS_SDRAM_1+0x100);
 
    	OmPin = INF_REG3_REG;
-	printf("\n\nChecking Boot Mode ...");
+	printf("\nChecking Boot Mode... ");
 	if(OmPin == BOOT_ONENAND) {
-		printf(" OneNand\n");
+		printf("OneNand\n");
 	} else if (OmPin == BOOT_NAND) {
-		printf(" NAND\n");
+		printf("NAND\n");
 	} else if (OmPin == BOOT_MMCSD) {
-		printf(" SDMMC\n");
+		printf("SDMMC\n");
 	} else if (OmPin == BOOT_EMMC) {
-		printf(" EMMC4.3\n");
+		printf("EMMC4.3\n");
 	} else if (OmPin == BOOT_EMMC_4_4) {
-		printf(" EMMC4.41\n");
+		printf("EMMC4.41\n");
+	} else {
+		printf("Unknown! (Not implemented?)\n");
 	}
     // denis added
     writel(0x6666, S5PV310_CLOCK_BASE + 0xC234); // CLK_SRC_LCD0
