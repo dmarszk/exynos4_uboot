@@ -306,8 +306,8 @@
 
 #define CONFIG_IDENT_STRING		" for EXYNOS4_GALAXY"
 
-#define CONFIG_ENABLE_MMU
-
+//#define CONFIG_ENABLE_MMU
+#undef CONFIG_ENABLE_MMU
 #ifdef CONFIG_ENABLE_MMU
 #define CONFIG_SYS_MAPPED_RAM_BASE	0xc0000000
 #define virt_to_phys(x)	virt_to_phy_s5pv310(x)

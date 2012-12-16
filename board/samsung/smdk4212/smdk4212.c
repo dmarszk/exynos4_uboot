@@ -27,11 +27,9 @@ unsigned int dmc_density = 0xffffffff;
 #endif
 unsigned int second_boot_info = 0xffffffff;
 
-
 #define SROM_DATA16_WIDTH(x)	(1<<((x*4)+0))
 #define SROM_WAIT_ENABLE(x)	(1<<((x*4)+1))
 #define SROM_BYTE_ENABLE(x)	(1<<((x*4)+2))
-
 
 #define	PS_HOLD		*(volatile unsigned long *)(0x1002330C)
 
