@@ -159,12 +159,6 @@ after_copy:
 	mov	r0, #0xA
 	bl uart_putc
 
-	ldr r0, =0x43E08834
-	ldr r1, mov_r0_0
-	str	r1, [r0], #4
-	ldr r1, mov_pc_lr
-	str r1, [r0]
-
 //	ldr r0, _board_init_f
 	ldr r0, =CONFIG_PHY_UBOOT_BASE
 	mov pc, r0
