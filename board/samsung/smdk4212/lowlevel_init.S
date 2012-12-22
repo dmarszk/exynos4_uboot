@@ -148,20 +148,26 @@ after_copy:
 	ldr r0, _second_boot_info
 //	str r1, [r0]
 
-	ldr	r0, =S5PV310_UART_CONSOLE_BASE
-	mov	r1, #'B'
-	str	r1, [r0, #UTXH_OFFSET]
-	mov	r1, #'L'
-	str	r1, [r0, #UTXH_OFFSET]
-	mov	r1, #'2'
-	str	r1, [r0, #UTXH_OFFSET]
-	mov	r1, #0xa
-	str	r1, [r0, #UTXH_OFFSET]
+	mov	r0, #'B'
+	bl uart_putc
+	mov	r0, #'L'
+	bl uart_putc
+	mov	r0, #'2'
+	bl uart_putc
+	mov	r0, #0xD
+	bl uart_putc
+	mov	r0, #0xA
+	bl uart_putc
 
 //	ldr r0, _board_init_f
 	ldr r0, =CONFIG_PHY_UBOOT_BASE
 	mov pc, r0
-	
+
+mov_r0_0:
+	mov r0, #0
+mov_pc_lr:
+	mov pc, lr
+
 _board_init_f:
 	.word board_init_f
 
@@ -172,6 +178,15 @@ _dmc_density:
 _second_boot_info:
 	.word second_boot_info
 
+uart_putc:
+	mov r2, r0
+	ldr	r0, =S5PV310_UART_CONSOLE_BASE
+1:	
+	ldr r1, [R0, #UTRSTAT_OFFSET]
+	ands r1, r1, #0x2
+	beq 1b
+	str	r2, [r0, #UTXH_OFFSET]
+	mov pc, lr
 
 wakeup_reset:
 
