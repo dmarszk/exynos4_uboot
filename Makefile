@@ -345,7 +345,7 @@ $(obj)u-boot.bin:	$(obj)u-boot
 		$(OBJCOPY) ${OBJCFLAGS} -O binary $< $@
 		$(BOARD_SIZE_CHECK)
 ifeq ($(CONFIG_S5PC210),y)
-		./mkbl2 u-boot.bin bl2.bin 14336		
+		./mkbl2 u-boot.bin bl2.bin 14336
 		make -C sd_fuse/
 endif
 

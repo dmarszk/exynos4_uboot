@@ -138,7 +138,7 @@ after_copy:
 	sub r0, r0, #4
 	ldr r1, [r0]
 	ldr r0, _dmc_density
-//	str r1, [r0]
+	str r1, [r0]
 #endif
 
 	/* store second boot information in u-boot C level variable */
@@ -146,7 +146,7 @@ after_copy:
 	sub r0, r0, #8
 	ldr r1, [r0]
 	ldr r0, _second_boot_info
-//	str r1, [r0]
+	str r1, [r0]
 
 	mov	r0, #'B'
 	bl uart_putc
@@ -160,63 +160,9 @@ after_copy:
 	bl uart_putc
 	mov	r0, #0xD
 	bl uart_putc
-
-	//tzsw check patch
-	ldr r0, =0x43E11684
-	ldr r1, mov_r0_0
-	str	r1, [r0], #4
-	ldr r1, mov_pc_lr
-	str r1, [r0]	
 	
-	//usbpm, clocks init
-	ldr r0, =0x43E21164	
-	ldr r1, mov_pc_lr
-	str r1, [r0]
-	
-//	ldr r0, =0x43E00D94
-	ldr r0, =0x43E00D58
-	ldr r1, sub_sp_r11_4
-	str r1, [r0], #4
-	ldr r1, ldmfd_sp_r11_pc
-	str r1, [r0]
-	ldr r1, nop_op
-	//iic/keypad init
-/*	ldr r0, =0x43E013AC
-	str r1, [r0]
-*/	
-	//power_ics init
-	ldr r0, =0x43E013D8
-	str r1, [r0]
-	
-	//charger and pmic init
-	ldr r0, =0x43E013B4	
-	str	r1, [r0]
-	
-	ldr r1, =0x43E2CF94 //dummy func returning some pmic value
-	ldr r0, =0x43E54804 //sboot_functions
-	str r1, [r0, #4] //print_platform_info
-	str r1, [r0, #12] //boot_update_pit
-	str r1, [r0, #16] //init_guid_or_smth	
-	str r1, [r0, #20] //initialize_ddi_data
-	str r1, [r0, #24] //init_param_part
-	str r1, [r0, #28] //mach_board_main
-	
-	
-	
-//	ldr r0, _board_init_f
-	ldr r0, =CONFIG_PHY_UBOOT_BASE
+	ldr r0, _board_init_f
 	mov pc, r0
-
-mov_r0_0:
-	mov r0, #0
-mov_pc_lr:
-	mov pc, lr
-nop_op:
-	nop
-sub_sp_r11_4:
-	sub SP, R11, #4
-ldmfd_sp_r11_pc:
-	LDMFD           SP!, {R11,PC}
 
 _board_init_f:
 	.word board_init_f
