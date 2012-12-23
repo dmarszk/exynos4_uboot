@@ -38,6 +38,39 @@ int board_init(void)
 	char bl1_version[9] = {0};
 	
 	GPIO_Init();
+	
+	GPIO_SetFunctionEach(eGPIO_X0, eGPIO_1, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X0, eGPIO_1, 0);
+	GPIO_SetFunctionEach(eGPIO_X0, eGPIO_4, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X0, eGPIO_4, 0);
+	GPIO_SetFunctionEach(eGPIO_X0, eGPIO_5, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X0, eGPIO_5, 0);
+	
+	
+	GPIO_SetFunctionEach(eGPIO_X1, eGPIO_3, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X1, eGPIO_3, 0);
+	GPIO_SetFunctionEach(eGPIO_X1, eGPIO_4, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X1, eGPIO_4, 0);
+	GPIO_SetFunctionEach(eGPIO_X2, eGPIO_0, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X2, eGPIO_0, 0);	
+	GPIO_SetFunctionEach(eGPIO_X2, eGPIO_1, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X2, eGPIO_1, 0);	
+	GPIO_SetFunctionEach(eGPIO_X2, eGPIO_2, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X2, eGPIO_2, 0);	
+	GPIO_SetFunctionEach(eGPIO_X2, eGPIO_7, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X2, eGPIO_7, 0);
+	GPIO_SetFunctionEach(eGPIO_X3, eGPIO_3, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X3, eGPIO_3, 0);
+	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_2, 0);
+	GPIO_SetPullUpDownEach(eGPIO_M1, eGPIO_2, 0);
+	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_3, 0);
+	GPIO_SetPullUpDownEach(eGPIO_M1, eGPIO_3, 0);
+	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_4, 0);
+	GPIO_SetPullUpDownEach(eGPIO_M1, eGPIO_4, 0);
+	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_5, 0);
+	GPIO_SetPullUpDownEach(eGPIO_M1, eGPIO_5, 0);
+	
+	
 	pmic_init();
 	
 	/* display BL1 version */
