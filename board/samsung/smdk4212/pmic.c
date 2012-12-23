@@ -332,6 +332,27 @@ void charger_max77693_init(void)
 void pmic_init(void)
 {
 	u8 pmic_id;
+	
+	GPIO_SetFunctionEach(eGPIO_D0, eGPIO_2, 1);
+	GPIO_SetDataEach(eGPIO_D0, eGPIO_2, 1);
+	GPIO_SetFunctionEach(eGPIO_D0, eGPIO_3, 1);
+	GPIO_SetDataEach(eGPIO_D0, eGPIO_3, 1);
+	
+	GPIO_SetFunctionEach(eGPIO_F1, eGPIO_4, 1);
+	GPIO_SetDataEach(eGPIO_F1, eGPIO_4, 1);
+	GPIO_SetFunctionEach(eGPIO_F1, eGPIO_5, 1);
+	GPIO_SetDataEach(eGPIO_F1, eGPIO_5, 1);
+	
+	GPIO_SetFunctionEach(eGPIO_M2, eGPIO_0, 1);
+	GPIO_SetDataEach(eGPIO_M2, eGPIO_0, 1);
+	GPIO_SetFunctionEach(eGPIO_M2, eGPIO_1, 1);
+	GPIO_SetDataEach(eGPIO_M2, eGPIO_1, 1);
+	
+	GPIO_SetFunctionEach(eGPIO_X0, eGPIO_7, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X0, eGPIO_7, 0);
+	GPIO_SetFunctionEach(eGPIO_X1, eGPIO_5, 0);
+	GPIO_SetPullUpDownEach(eGPIO_X1, eGPIO_5, 0);
+	
 	I2C_InitIp(7, 400*1000, 1000000);
 	/* read ID */
 	IIC7_ERead(S5M8767_ADDR, 0, &pmic_id);
