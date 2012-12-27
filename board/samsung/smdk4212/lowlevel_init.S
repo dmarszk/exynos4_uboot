@@ -180,7 +180,7 @@ uart_putc:
 1:	
 	ldr r1, [R0, #UTRSTAT_OFFSET]
 	ands r1, r1, #0x2
-	beq 1b
+	bne 1b
 	str	r2, [r0, #UTXH_OFFSET]
 	mov pc, lr
 
