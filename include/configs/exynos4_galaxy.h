@@ -152,7 +152,7 @@
 #undef CONFIG_USB_STORAGE
 #define CONFIG_S3C_USBD
 
-#define USBD_DOWN_ADDR		0xc0000000
+#define USBD_DOWN_ADDR		0x43e00000
 
 /* allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
