@@ -945,7 +945,7 @@ int boot_get_ramdisk (int argc, char * const argv[], bootm_headers_t *images,
 			break;
 #endif
 		default:
-			puts ("Wrong Ramdisk Image Format\n");
+			printf ("Wrong Ramdisk Image Format, image addr 0x%08lX, image magic 0x%08lX\n", rd_addr, *((uint32_t*)rd_addr));
 			rd_data = rd_len = rd_load = 0;
 			return 1;
 		}

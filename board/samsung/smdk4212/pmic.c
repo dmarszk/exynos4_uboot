@@ -343,8 +343,9 @@ void pmic_init(void)
 	GPIO_SetFunctionEach(eGPIO_X1, eGPIO_5, 0);
 	GPIO_SetPullUpDownEach(eGPIO_X1, eGPIO_5, 0);
 
-	
+	udelay(10000); /* make sure all GPIOs got applied */
 	I2C_InitIp(7, 400*1000, 1000000);
+	udelay(10000); /* make sure I2C controller starts up */
 	/* read ID */
 	IIC7_ERead(S5M8767_ADDR, 0, &pmic_id);
 	if(pmic_id >= 0x0 && pmic_id <= 0x5) {

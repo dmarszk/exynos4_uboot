@@ -203,20 +203,6 @@
 #define USE_MMC2
 #define USE_MMC4
 
-/*
- * BOOTP options
- */
-#define CONFIG_BOOTP_SUBNETMASK
-#define CONFIG_BOOTP_GATEWAY
-#define CONFIG_BOOTP_HOSTNAME
-#define CONFIG_BOOTP_BOOTPATH
-
-#define CONFIG_ETHADDR		00:40:5c:26:0a:5b
-#define CONFIG_NETMASK          255.255.255.0
-#define CONFIG_IPADDR		192.168.0.20
-#define CONFIG_SERVERIP		192.168.0.10
-#define CONFIG_GATEWAYIP	192.168.0.1
-
 #define CONFIG_BOOTDELAY	3
 /* Default boot commands for Android booting. */
 #define CONFIG_BOOTCOMMAND	"movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000"
