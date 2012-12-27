@@ -643,6 +643,8 @@ int genimg_get_format (void *img_addr)
 	hdr = (const image_header_t *)img_addr;
 	if (image_check_magic(hdr))
 		format = IMAGE_FORMAT_LEGACY;
+	if (image_is_gzip(hdr))
+		format = IMAGE_FORMAT_LEGACY;
 #if defined(CONFIG_FIT) || defined(CONFIG_OF_LIBFDT)
 	else {
 		fit_hdr = (char *)img_addr;
