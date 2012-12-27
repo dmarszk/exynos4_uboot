@@ -312,7 +312,7 @@
 #define CFG_FASTBOOT_TRANSFER_BUFFER            (0x48000000)
 #define CFG_FASTBOOT_TRANSFER_BUFFER_SIZE       (0x10000000)   /* 256MB */
 #define CFG_FASTBOOT_ADDR_KERNEL                (0x40008000)
-#define CFG_FASTBOOT_ADDR_RAMDISK               (0x40800000)
+#define CFG_FASTBOOT_ADDR_RAMDISK               (0x42000000)
 #define CFG_FASTBOOT_PAGESIZE                   (2048)  // Page size of booting device
 #define CFG_FASTBOOT_SDMMC_BLOCKSIZE            (512)   // Block size of sdmmc
 #define CFG_PARTITION_START			(0x4000000)
