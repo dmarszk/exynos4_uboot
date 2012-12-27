@@ -206,7 +206,7 @@
 #define CONFIG_BOOTDELAY	3
 /* Default boot commands for Android booting. */
 #define CONFIG_BOOTCOMMAND	"movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000"
-#define CONFIG_BOOTARGS	""
+#define CONFIG_BOOTARGS	"console=ttySAC2,115200n8 loglevel=9 sec_debug.level=0 sec_watchdog.sec_pet=5 androidboot.debug_level=0x4f4c sec_log=0x200000@0x46000000 s3cfb.bootloaderfb=0x5ec00000 sysscope=0xff000000 lcdtype=0 consoleblank=0 lpcharge=0 lpj=3981312 vmalloc=144m oops=panic pmic_info=68 cordon=4354e99bd8adfa7b2a1be19dd7b94e71 androidboot.emmc_checksum=3 androidboot.odin_download=80300000 androidboot.bootloader=GC100XXALJF androidboot.serialno=4208fcaa2cd59fc5 snd_soc_core.pmdown_time=1000"
 
 #define CONFIG_BOOTCOMMAND2	\
 		"mmc erase user 0 1072 1;"	\
