@@ -460,6 +460,10 @@ static inline int image_check_magic (const image_header_t *hdr)
 {
 	return (image_get_magic (hdr) == IH_MAGIC);
 }
+static inline int image_is_gzip (const image_header_t *hdr)
+{
+	return (image_get_magic (hdr) == 0x1F8B0800);
+}
 static inline int image_check_type (const image_header_t *hdr, uint8_t type)
 {
 	return (image_get_type (hdr) == type);

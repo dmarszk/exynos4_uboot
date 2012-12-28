@@ -251,6 +251,7 @@ static void setup_memory_tags (bd_t *bd)
 {
 	int i;
 
+	printf("ATAG_MEM: \n");
 	for (i = 0; i < nr_dram_banks; i++) {
 		params->hdr.tag = ATAG_MEM;
 		params->hdr.size = tag_size (tag_mem32);
@@ -258,6 +259,7 @@ static void setup_memory_tags (bd_t *bd)
 		params->u.mem.start = bd->bi_dram[i].start;
 		params->u.mem.size = bd->bi_dram[i].size;
 
+		printf("[%d]: 0x%X@0x%X\n", i, bd->bi_dram[i].size, bd->bi_dram[i].start);
 		params = tag_next (params);
 	}
 }

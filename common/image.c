@@ -365,6 +365,9 @@ static const image_header_t *image_get_ramdisk (ulong rd_addr, uint8_t arch,
 {
 	const image_header_t *rd_hdr = (const image_header_t *)rd_addr;
 
+	if (image_is_gzip(rd_hdr)) /* Skip all the checks */
+		return rd_hdr;
+		
 	if (!image_check_magic (rd_hdr)) {
 		puts ("Bad Magic Number\n");
 		show_boot_progress (-10);
@@ -641,7 +644,10 @@ int genimg_get_format (void *img_addr)
 #endif
 
 	hdr = (const image_header_t *)img_addr;
+	printf("ramdisk image magic 0x%08X\n", image_get_magic (hdr));
 	if (image_check_magic(hdr))
+		format = IMAGE_FORMAT_LEGACY;
+	else if (image_is_gzip(hdr))
 		format = IMAGE_FORMAT_LEGACY;
 #if defined(CONFIG_FIT) || defined(CONFIG_OF_LIBFDT)
 	else {
@@ -651,6 +657,7 @@ int genimg_get_format (void *img_addr)
 	}
 #endif
 
+	printf("ramdisk format = %d\n", format);
 	return format;
 }
 
@@ -867,10 +874,17 @@ int boot_get_ramdisk (int argc, char * const argv[], bootm_headers_t *images,
 
 			if (rd_hdr == NULL)
 				return 1;
-
-			rd_data = image_get_data (rd_hdr);
-			rd_len = image_get_data_size (rd_hdr);
-			rd_load = image_get_load (rd_hdr);
+			if (image_is_gzip(rd_hdr)) {
+				rd_data = CFG_FASTBOOT_ADDR_RAMDISK;
+				rd_load = CFG_FASTBOOT_ADDR_RAMDISK;
+				rd_len = 0;				
+			}
+			else
+			{
+				rd_data = image_get_data (rd_hdr);
+				rd_len = image_get_data_size (rd_hdr);
+				rd_load = image_get_load (rd_hdr);
+			}
 			break;
 #if defined(CONFIG_FIT)
 		case IMAGE_FORMAT_FIT:

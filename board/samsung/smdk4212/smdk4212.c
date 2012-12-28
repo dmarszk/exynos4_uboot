@@ -32,6 +32,12 @@ unsigned int second_boot_info = 0xffffffff;
 #define SROM_BYTE_ENABLE(x)	(1<<((x*4)+2))
 
 #define	PS_HOLD		*(volatile unsigned long *)(0x1002330C)
+u32 board_rev;
+
+u32 get_board_rev(void)
+{
+	return board_rev;
+}
 
 int board_init(void)
 {
@@ -61,6 +67,7 @@ int board_init(void)
 	GPIO_SetPullUpDownEach(eGPIO_X2, eGPIO_7, 0);
 	GPIO_SetFunctionEach(eGPIO_X3, eGPIO_3, 0);
 	GPIO_SetPullUpDownEach(eGPIO_X3, eGPIO_3, 0);
+	
 	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_2, 0);
 	GPIO_SetPullUpDownEach(eGPIO_M1, eGPIO_2, 0);
 	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_3, 0);
@@ -70,6 +77,13 @@ int board_init(void)
 	GPIO_SetFunctionEach(eGPIO_M1, eGPIO_5, 0);
 	GPIO_SetPullUpDownEach(eGPIO_M1, eGPIO_5, 0);
 	
+	board_rev = 
+	(GPIO_GetDataEach(eGPIO_M1, eGPIO_5) << 3) |
+	(GPIO_GetDataEach(eGPIO_M1, eGPIO_4) << 2) |
+	(GPIO_GetDataEach(eGPIO_M1, eGPIO_3) << 1) | 
+	(GPIO_GetDataEach(eGPIO_M1, eGPIO_2) << 0);
+	
+	printf("Board revision: 0x%X\n", board_rev);
 	
 	pmic_init();
 	
