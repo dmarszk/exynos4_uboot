@@ -179,8 +179,9 @@ uart_putc:
 	ldr	r0, =S5PV310_UART_CONSOLE_BASE
 1:	
 	ldr r1, [R0, #UTRSTAT_OFFSET]
-	ands r1, r1, #0x2
-	bne 1b
+	and r1, r1, #0x2
+	cmp r1, #0
+	beq 1b
 	str	r2, [r0, #UTXH_OFFSET]
 	mov pc, lr
 
