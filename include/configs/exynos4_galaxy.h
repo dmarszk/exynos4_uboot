@@ -337,8 +337,7 @@
  * machine type
  */
 
-//#define MACH_TYPE_C220		3765	/* SMDKC210 machine ID */
-#define MACH_TYPE_C220		4289	/* ODROIDX machine ID */
+#define MACH_TYPE_C220		3765	/* SMDKC210/Galaxy Cam/I9300 machine ID */
 
 #define CONFIG_ENV_OFFSET		0x0007C000
 
