@@ -99,7 +99,8 @@ int do_bootm_linux(int flag, int argc, char *argv[], bootm_headers_t *images)
 	char	*s;
 	int	machid = bd->bi_arch_number;
 	void	(*kernel_entry)(int zero, int arch, uint params);
-	int	ret;
+	int	ret, i;
+	struct tag* tags;
 
 #ifdef CONFIG_CMDLINE_TAG
 	char *commandline = getenv ("bootargs");
@@ -155,7 +156,19 @@ int do_bootm_linux(int flag, int argc, char *argv[], bootm_headers_t *images)
 #endif
 	setup_end_tag(bd);
 #endif
-
+	printf("ATAGs dump:\n");
+	tags = (struct tag *) bd->bi_boot_params;
+	while(tags->hdr.tag != ATAG_NONE){
+		if(tags->hdr.tag == ATAG_CMDLINE)
+			printf("<CMDLINE>"/*, ((u8*)tags)+8*/);
+		else
+			for(i = 0; i < tags->hdr.size; ++i)
+			{
+				printf("%X ", ((u32*)tags)[i]);
+			}
+		printf("\n");
+		tags = tag_next(tags);
+	}
 	announce_and_cleanup();
 
 #ifdef CONFIG_ENABLE_MMU
@@ -250,8 +263,7 @@ int nr_dram_banks = -1;
 static void setup_memory_tags (bd_t *bd)
 {
 	int i;
-
-	printf("ATAG_MEM: \n");
+	
 	for (i = 0; i < nr_dram_banks; i++) {
 		params->hdr.tag = ATAG_MEM;
 		params->hdr.size = tag_size (tag_mem32);
@@ -259,7 +271,6 @@ static void setup_memory_tags (bd_t *bd)
 		params->u.mem.start = bd->bi_dram[i].start;
 		params->u.mem.size = bd->bi_dram[i].size;
 
-		printf("[%d]: 0x%X@0x%X\n", i, bd->bi_dram[i].size, bd->bi_dram[i].start);
 		params = tag_next (params);
 	}
 }
