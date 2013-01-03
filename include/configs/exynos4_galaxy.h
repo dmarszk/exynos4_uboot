@@ -67,9 +67,9 @@
 //#include <asm/arch/cpu.h>		/* get chip and board defs */
 
 /* APLL : 800MHz */
-//#define CONFIG_CLK_ARM_800_APLL_800
+#define CONFIG_CLK_ARM_800_APLL_800
 /* APLL : 1GHz */
-#define CONFIG_CLK_ARM_1000_APLL_1000
+//#define CONFIG_CLK_ARM_1000_APLL_1000
 /* APLL : 1.1GHz */
 //#define CONFIG_CLK_ARM_1200_APLL_1100
 /* APLL : 1.2GHz */
