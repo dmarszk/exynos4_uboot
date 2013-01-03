@@ -106,6 +106,11 @@ int board_init(void)
 
 	gd->bd->bi_boot_params = (PHYS_SDRAM_1+0x100);
 
+#ifdef CONFIG_EXYNOS4_GALAXY
+	printf("\nOverwriting Boot Mode to BOOT_MMCSD... ");
+	INF_REG3_REG = BOOT_MMCSD;
+#endif
+
    	OmPin = INF_REG3_REG;
 	printf("\nChecking Boot Mode... ");
 	if(OmPin == BOOT_ONENAND) {
