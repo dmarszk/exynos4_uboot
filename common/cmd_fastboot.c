@@ -482,13 +482,14 @@ static int write_to_ptn(struct fastboot_ptentry *ptn, unsigned int addr, unsigne
 #endif
 
 #if defined(CFG_FASTBOOT_SDMMCBSP)
-
+#if defined(CONFIG_HKDK4412)
+static int DEV_NUM = 0;
+#else
 #if defined(CONFIG_S5P6450) && !defined(CONFIG_EMMC_4_4)
 #define	DEV_NUM 1
-#elif defined(CONFIG_EXYNOS4_GALAXY)
-#define DEV_NUM 1
 #else
 #define	DEV_NUM 0
+#endif
 #endif
 static int write_to_ptn_sdmmc(struct fastboot_ptentry *ptn, unsigned int addr, unsigned int size)
 {
