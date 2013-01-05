@@ -44,14 +44,11 @@
 #define CONFIG_EVT1		1	/* EVT1 */
 //#define NAND_BOOTING		1
 
-
 #define CONFIG_EXYNOS4_GALAXY
 
-/*
+/* We need trustzone to be compatible with stock kernels, built with TRUSTZONE support. */
 #define CONFIG_TRUSTZONE
 #define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
-*/
-#undef CONFIG_TRUSTZONE
 
 #define CONFIG_SECURE_BL1_ONLY
 //#define CONFIG_SECURE_BOOT
