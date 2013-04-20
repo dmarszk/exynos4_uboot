@@ -34,7 +34,6 @@ lowlevel_init:
 	ldr	sp, =0x02060000
 	push {lr}
 
-	
 	ldr r0, =0x10500054
 	ldr r1, [r0]
 	orr r1, r1, #0xF
@@ -63,8 +62,6 @@ lowlevel_init:
 	ldr	r1, [r0]
 	orr	r1, r1, #0x300
 	str	r1, [r0]
-	
-
 	
 	bl uart_asm_init
 	
@@ -161,7 +158,12 @@ after_copy:
 	mov	r0, #0xD
 	bl uart_putc
 	
+#ifdef CONFIG_TRUSTZONE
+	ldr lr, _board_init_f
+	ldr r0, =TZSW_MEM_ADDR
+#else
 	ldr r0, _board_init_f
+#endif
 	mov pc, r0
 
 _board_init_f:
