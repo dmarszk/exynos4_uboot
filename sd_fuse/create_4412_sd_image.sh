@@ -47,7 +47,7 @@ echo "Exynos4412 bootloader fusing"
 dd iflag=dsync oflag=dsync if=../u-boot.bin of=$1 seek=$uboot_pos
 ####################################
 echo "Exynos4412 tzsw fusing"
-dd iflag=dsync oflag=dsync if=./gcam_tzsw.bin of=$1 
+dd iflag=dsync oflag=dsync if=./gcam_sdcard_tzsw.bin of=$1 
 seek=$tzsw_pos
 ####################################
 echo "Filling env with zeroes.."
