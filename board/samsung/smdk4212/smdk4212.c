@@ -45,13 +45,14 @@ void configure_tz(struct tz_info* tzi)
 	tzi->cpu_id = 0x4412;
 	tzi->val_0x10C0C = 0x10C0C;
 	tzi->val_0 = 0;
+	/*
 	tzi->conditional_cpu_id = 0x4412;
-	tzi->conditional_tag_SLSI = 0x49534C53; //"SLSI"
+	tzi->conditional_tag_ISLS = 0x49534C53; //"ISLS"*/
 	tzi->sdram_start = CONFIG_SYS_SDRAM_BASE;
 	tzi->sdram_size = (CONFIG_NR_DRAM_BANKS * SDRAM_BANK_SIZE);
 	tzi->tzram_start = 0x7FF00000;
 	tzi->tzram_size = 0x100000;
-	tzi->tag_SLSI = 0x49534C53;
+	tzi->tag_ISLS = 0x49534C53;
 }
 
 u32 get_board_rev(void)

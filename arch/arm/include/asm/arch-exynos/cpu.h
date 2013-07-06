@@ -801,13 +801,13 @@ struct tz_info
   u32 val_0;
   u32 unknown_2;
   u32 conditional_cpu_id;
-  u32 conditional_tag_SLSI;
+  u32 conditional_tag_ISLS;
   u32 unknown_3[2];
   u32 sdram_start;
   u32 sdram_size;
   u32 tzram_start;
   u32 tzram_size;
-  u32 tag_SLSI;
+  u32 tag_ISLS;
 };
 extern void configure_tz(struct tz_info* tzi);
 #endif
