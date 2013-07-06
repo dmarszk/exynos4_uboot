@@ -119,7 +119,7 @@ v310_1:
 	str r6, [r0]
 #endif
 
-	bl tzasc_init
+//	bl tzasc_init
 	bl tzpc_init
 
 	b load_uboot
@@ -525,13 +525,14 @@ tzasc_init:
 tzpc_init:
 
 	ldr	r0, =ELFIN_TZPC0_BASE
-	mov	r1, #0x2f
+	mov r1, #0x0
+	//	mov	r1, #0x2f
 	str	r1, [r0]
 	mov	r1, #0xff
 	str	r1, [r0, #TZPC_DECPROT0SET_OFFSET]	
-	mov	r1, #0x3
-	str	r1, [r0, #TZPC_DECPROT1CLR_OFFSET]
-	mov	r1, #0xfc
+//	mov	r1, #0x3
+//	str	r1, [r0, #TZPC_DECPROT1CLR_OFFSET]
+//	mov	r1, #0xfc
 	str	r1, [r0, #TZPC_DECPROT1SET_OFFSET]	
 	mov r1, #0xff
 	str	r1, [r0, #TZPC_DECPROT2SET_OFFSET]
@@ -565,10 +566,10 @@ tzpc_init:
 	str	r1, [r0, #TZPC_DECPROT0SET_OFFSET]
 	str	r1, [r0, #TZPC_DECPROT1SET_OFFSET]
 	str	r1, [r0, #TZPC_DECPROT2SET_OFFSET]
-	mov r1, #0xf3
+//	mov r1, #0xf3
 	str	r1, [r0, #TZPC_DECPROT3SET_OFFSET]
-	mov r1, #0xc
-	str	r1, [r0, #TZPC_DECPROT3CLR_OFFSET]
+//	mov r1, #0xc
+//	str	r1, [r0, #TZPC_DECPROT3CLR_OFFSET]
 
 	mov	pc, lr
 
