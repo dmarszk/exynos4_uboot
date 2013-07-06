@@ -165,7 +165,8 @@ after_copy:
 	ldr lr, _board_init_f
 	ldr r1, =TZ_PARAMS_ADDR
 	mov r0, #0
-	ldr pc, =TZSW_MEM_ADDR
+	//ldr pc, =TZSW_MEM_ADDR
+	ldr pc, _board_init_f
 #else
 	ldr pc, _board_init_f
 #endif
