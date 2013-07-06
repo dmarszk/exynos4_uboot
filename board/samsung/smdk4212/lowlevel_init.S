@@ -119,6 +119,7 @@ v310_1:
 	str r6, [r0]
 #endif
 
+	bl tzasc_init
 	bl tzpc_init
 
 	b load_uboot
@@ -250,12 +251,14 @@ skip_dmc:
 	bleq	mmc_ch4_devider_change
 #endif
 
+	bl	tzasc_init
 	bl	tzpc_init
 	b	exit_wakeup
 
 wake_v310:
 	bl system_clock_init
 	bl mem_ctrl_asm_init
+	bl tzasc_init
 	bl tzpc_init
 
 exit_wakeup:
@@ -487,6 +490,41 @@ wait_orwb:
 
 	mov	pc, lr
 
+
+tzasc_init:
+	ldr r0, =ELFIN_TZASC_LR_BASE
+	mov r1, #0xF0000000
+	str r1, [r0, #TZASC_RA0_OFFSET]
+	ldr r1, =0xC0000027
+	str r1, [r0, #TZASC_RA3_OFFSET]
+	ldr r1, =0x7FF00000
+	str r1, [r0, #TZASC_RSL3_OFFSET]
+	
+	ldr r0, =ELFIN_TZASC_LW_BASE
+	mov r1, #0xF0000000
+	str r1, [r0, #TZASC_RA0_OFFSET]
+	ldr r1, =0xC0000027
+	str r1, [r0, #TZASC_RA3_OFFSET]
+	ldr r1, =0x7FF00000
+	str r1, [r0, #TZASC_RSL3_OFFSET]
+	
+	ldr r0, =ELFIN_TZASC_RR_BASE
+	mov r1, #0xF0000000
+	str r1, [r0, #TZASC_RA0_OFFSET]
+	ldr r1, =0xC0000027
+	str r1, [r0, #TZASC_RA3_OFFSET]
+	ldr r1, =0x7FF00000
+	str r1, [r0, #TZASC_RSL3_OFFSET]
+	
+	ldr r0, =ELFIN_TZASC_RW_BASE
+	mov r1, #0xF0000000
+	str r1, [r0, #TZASC_RA0_OFFSET]
+	ldr r1, =0xC0000027
+	str r1, [r0, #TZASC_RA3_OFFSET]
+	ldr r1, =0x7FF00000
+	str r1, [r0, #TZASC_RSL3_OFFSET]
+	mov pc, lr
+	
 /*
  * Setting TZPC[TrustZone Protection Controller]
  */
