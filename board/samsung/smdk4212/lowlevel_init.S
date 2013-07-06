@@ -158,16 +158,17 @@ after_copy:
 	bl uart_putc
 	mov	r0, #0xD
 	bl uart_putc
-/*	
+
 #ifdef CONFIG_TRUSTZONE
+	ldr r0, =TZ_PARAMS_ADDR
+	bl configure_tz
 	ldr lr, _board_init_f
-	ldr r0, =TZSW_MEM_ADDR
+	ldr r1, =TZ_PARAMS_ADDR
+	mov r0, #0
+	ldr pc, =TZSW_MEM_ADDR
 #else
-	ldr r0, _board_init_f
-#endif*/
-	
-	ldr r0, _board_init_f 
-	mov pc, r0
+	ldr pc, _board_init_f
+#endif
 
 _board_init_f:
 	.word board_init_f
@@ -494,37 +495,27 @@ wait_orwb:
 
 
 tzasc_init:
+	mov r1, #0xF0000000
+	mov r2, #0xC0000027
+	ldr r3, =0x7FF00000
+	
 	ldr r0, =ELFIN_TZASC_LR_BASE
-	mov r1, #0xF0000000
 	str r1, [r0, #TZASC_RA0_OFFSET]
-	ldr r1, =0xC0000027
-	str r1, [r0, #TZASC_RA3_OFFSET]
-	ldr r1, =0x7FF00000
-	str r1, [r0, #TZASC_RSL3_OFFSET]
-	
+	str r2, [r0, #TZASC_RA3_OFFSET]
+	str r3, [r0, #TZASC_RSL3_OFFSET]
 	ldr r0, =ELFIN_TZASC_LW_BASE
-	mov r1, #0xF0000000
 	str r1, [r0, #TZASC_RA0_OFFSET]
-	ldr r1, =0xC0000027
-	str r1, [r0, #TZASC_RA3_OFFSET]
-	ldr r1, =0x7FF00000
-	str r1, [r0, #TZASC_RSL3_OFFSET]
-	
+	str r2, [r0, #TZASC_RA3_OFFSET]
+	str r3, [r0, #TZASC_RSL3_OFFSET]
 	ldr r0, =ELFIN_TZASC_RR_BASE
-	mov r1, #0xF0000000
 	str r1, [r0, #TZASC_RA0_OFFSET]
-	ldr r1, =0xC0000027
-	str r1, [r0, #TZASC_RA3_OFFSET]
-	ldr r1, =0x7FF00000
-	str r1, [r0, #TZASC_RSL3_OFFSET]
-	
+	str r2, [r0, #TZASC_RA3_OFFSET]
+	str r3, [r0, #TZASC_RSL3_OFFSET]
 	ldr r0, =ELFIN_TZASC_RW_BASE
-	mov r1, #0xF0000000
 	str r1, [r0, #TZASC_RA0_OFFSET]
-	ldr r1, =0xC0000027
-	str r1, [r0, #TZASC_RA3_OFFSET]
-	ldr r1, =0x7FF00000
-	str r1, [r0, #TZASC_RSL3_OFFSET]
+	str r2, [r0, #TZASC_RA3_OFFSET]
+	str r3, [r0, #TZASC_RSL3_OFFSET]
+	
 	mov pc, lr
 	
 /*

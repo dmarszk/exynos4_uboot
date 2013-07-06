@@ -787,5 +787,30 @@ static inline unsigned int samsung_get_base_##device(void)	\
 SAMSUNG_BASE(uart, UART_CONSOLE_BASE)
 #endif
 
+#ifndef __ASSEMBLY__
+struct tz_info
+{
+  u32 field_0; //_val_0x10000;
+  u32 field_4; //_val_0x54
+  u32 field_8; //_val_0x2027FE0;
+  u32 val_0x20;
+  u32 bl1_ver[2];
+  u32 unknown_1[2];
+  u32 cpu_id; //0x4412
+  u32 val_0x10C0C;
+  u32 val_0;
+  u32 unknown_2;
+  u32 conditional_cpu_id;
+  u32 conditional_tag_SLSI;
+  u32 unknown_3[2];
+  u32 sdram_start;
+  u32 sdram_size;
+  u32 tzram_start;
+  u32 tzram_size;
+  u32 tag_SLSI;
+};
+extern void configure_tz(struct tz_info* tzi);
+#endif
+
 #endif  /* !CONFIG_EXYNOS5210 */
 #endif	/* _S5PV310_CPU_H */
