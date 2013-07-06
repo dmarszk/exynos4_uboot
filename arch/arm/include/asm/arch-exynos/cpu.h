@@ -791,7 +791,7 @@ SAMSUNG_BASE(uart, UART_CONSOLE_BASE)
 struct tz_info
 {
   u32 field_0; //_val_0x10000;
-  u32 field_4; //_val_0x54
+  u32 info_size;
   u32 field_8; //_val_0x2027FE0;
   u32 val_0x20;
   u32 bl1_ver[2];

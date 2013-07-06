@@ -37,7 +37,7 @@ u32 board_rev;
 void configure_tz(struct tz_info* tzi)
 {
 	tzi->field_0 = 0x10000;
-	tzi->field_4 = 0x54;
+	tzi->info_size = sizeof(struct tz_info);
 	tzi->field_8 = 0x2027FE0;
 	tzi->val_0x20 = 0x20;
 	tzi->bl1_ver[0] = *((u32*)(0x02022fc8));
@@ -45,9 +45,8 @@ void configure_tz(struct tz_info* tzi)
 	tzi->cpu_id = 0x4412;
 	tzi->val_0x10C0C = 0x10C0C;
 	tzi->val_0 = 0;
-	/*
 	tzi->conditional_cpu_id = 0x4412;
-	tzi->conditional_tag_ISLS = 0x49534C53; //"ISLS"*/
+	tzi->conditional_tag_ISLS = 0x49534C53; //"ISLS"
 	tzi->sdram_start = CONFIG_SYS_SDRAM_BASE;
 	tzi->sdram_size = (CONFIG_NR_DRAM_BANKS * SDRAM_BANK_SIZE);
 	tzi->tzram_start = 0x7FF00000;
