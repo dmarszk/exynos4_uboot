@@ -158,13 +158,15 @@ after_copy:
 	bl uart_putc
 	mov	r0, #0xD
 	bl uart_putc
-	
+/*	
 #ifdef CONFIG_TRUSTZONE
 	ldr lr, _board_init_f
 	ldr r0, =TZSW_MEM_ADDR
 #else
 	ldr r0, _board_init_f
-#endif
+#endif*/
+	
+	ldr r0, _board_init_f 
 	mov pc, r0
 
 _board_init_f:
