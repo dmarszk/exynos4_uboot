@@ -162,11 +162,26 @@ after_copy:
 #ifdef CONFIG_TRUSTZONE
 	ldr r0, =TZ_PARAMS_ADDR
 	bl configure_tz
-	ldr lr, _board_init_f
+	adr lr, board_init_wrapper
 	ldr r1, =TZ_PARAMS_ADDR
 	mov r0, #0
 	ldr pc, =TZSW_MEM_ADDR
 #else
+	ldr pc, _board_init_f
+#endif
+
+#ifdef CONFIG_TRUSTZONE
+board_init_wrapper:
+	msr	cpsr, #0xd3	
+	mov r0, #0
+	mcr	p15, 0, r0, c8, c7, 0 /* Write TLBIALL - Invalidate entire Unified TLB */
+	mcr	p15, 0, r0, c7, c5, 0 /* Write ICIALLU - Invalidate Instruction Cache */
+	mrc	p15, 0, r0, c1, c0, 0
+	bic	r0, r0, #0x00002000	/* clear bits 13, 9:8 (--V- ----) */
+	bic	r0, r0, #0x00000007	/* clear bits 2:0 (---- -CAM) */
+	orr	r0, r0, #0x00000002	/* set bit 2 (A) Align */
+	orr	r0, r0, #0x00000800	/* set bit 11 (Z) Flow prediction */
+	mcr	p15, 0, r0, c1, c0, 0
 	ldr pc, _board_init_f
 #endif
 
