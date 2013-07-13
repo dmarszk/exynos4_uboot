@@ -68,13 +68,18 @@ void * uboot_memcpy(void * dest,const void *src,size_t count)
 
 void movi_uboot_copy(void)
 {
+int i;
+for(i = 0; i < 100; i++)
+{
+	*((u32*)(TZSW_MEM_ADDR)+i) = 0;
+}
 #ifdef CONFIG_EVT1
 #ifdef CONFIG_CORTEXA5_ENABLE
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, 0x40000000);
 #endif
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
 #ifdef CONFIG_TRUSTZONE
-	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_TZSW_BLKCNT, TZSW_MEM_ADDR);
+//	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_TZSW_BLKCNT, TZSW_MEM_ADDR);
 #endif
 #else
 	copy_sd_mmc_to_mem copy_uboot = (copy_sd_mmc_to_mem)(0x00002488);
