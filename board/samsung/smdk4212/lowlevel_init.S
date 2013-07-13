@@ -158,7 +158,29 @@ after_copy:
 	bl uart_putc
 	mov	r0, #0xD
 	bl uart_putc
+	
+	mov r1, #0	
+1:
+	ldr r2, =TZSW_MEM_ADDR
+	ldrb r4, [r2, r1]
+	
+	UBFX    R0, R4, #4, #4
+	CMP     R0, #10
+	ADDCC   R0, R0, #48
+	ADDCS   R0, R0, #55
+	BL      uart_putc
 
+	UBFX    R0, R4, #0, #4
+	CMP     R0, #10
+	ADDCC   R0, R0, #48
+	ADDCS   R0, R0, #55
+	bl uart_putc
+	MOV r0, #' '
+	bl uart_putc
+	add r1, #1
+	cmp r1, #20
+	ble 1b
+	
 #ifdef CONFIG_TRUSTZONE
 	ldr r0, =TZ_PARAMS_ADDR
 	bl configure_tz
