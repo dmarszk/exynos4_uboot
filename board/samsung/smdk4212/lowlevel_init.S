@@ -161,7 +161,7 @@ after_copy:
 	
 	mov r6, #0	
 1:
-	ldr r5, =CFG_FASTBOOT_TRANSFER_BUFFER
+	ldr r5, =TZSW_MEM_ADDR
 	ldrb r4, [r5, r6]
 	
 	UBFX    R0, R4, #4, #4
@@ -178,7 +178,7 @@ after_copy:
 	MOV r0, #' '
 	bl uart_putc
 	add r6, #1
-	cmp r6, #40
+	cmp r6, #8
 	ble 1b
 #ifdef CONFIG_TRUSTZONE
 	ldr r0, =TZ_PARAMS_ADDR
