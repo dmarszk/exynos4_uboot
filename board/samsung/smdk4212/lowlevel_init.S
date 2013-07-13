@@ -159,10 +159,10 @@ after_copy:
 	mov	r0, #0xD
 	bl uart_putc
 	
-	mov r1, #0	
+	mov r6, #0	
 1:
-	ldr r2, =CONFIG_PHY_UBOOT_BASE
-	ldrb r4, [r2, r1]
+	ldr r5, =CONFIG_PHY_UBOOT_BASE
+	ldrb r4, [r5, r6]
 	
 	UBFX    R0, R4, #4, #4
 	CMP     R0, #10
@@ -177,8 +177,8 @@ after_copy:
 	bl uart_putc
 	MOV r0, #' '
 	bl uart_putc
-	add r1, #1
-	cmp r1, #20
+	add r5, #1
+	cmp r5, #20
 	ble 1b
 	
 #ifdef CONFIG_TRUSTZONE
