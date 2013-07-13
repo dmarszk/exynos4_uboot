@@ -80,7 +80,7 @@ int i;
 		*((u32*)(0x2028000)+i) = 0xBAADD00D;
 	}
 	SDMMC_ReadBlocks(MOVI_TZSW_POS, MOVI_TZSW_BLKCNT, CFG_FASTBOOT_TRANSFER_BUFFER);
-	uboot_memcpy(TZSW_MEM_ADDR,CFG_FASTBOOT_TRANSFER_BUFFER,PART_SIZE_TZSW);
+	uboot_memcpy(TZSW_MEM_ADDR, CFG_FASTBOOT_TRANSFER_BUFFER, PART_SIZE_TZSW);
 #endif
 #else
 	copy_sd_mmc_to_mem copy_uboot = (copy_sd_mmc_to_mem)(0x00002488);
