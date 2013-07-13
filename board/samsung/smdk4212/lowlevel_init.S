@@ -158,9 +158,9 @@ after_copy:
 	bl uart_putc
 	mov	r0, #0xD
 	bl uart_putc
-	
+/*	
 	mov r6, #0
-	ldr r5, =(CFG_FASTBOOT_TRANSFER_BUFFER+0x5500)
+	ldr r5, =(TZSW_MEM_ADDR+0x5500)
 1:
 	ldrb r4, [r5, r6]
 	
@@ -202,6 +202,7 @@ after_copy:
 	add r6, #1
 	cmp r6, #8
 	ble 1b
+*/
 #ifdef CONFIG_TRUSTZONE
 	ldr r0, =TZ_PARAMS_ADDR
 	bl configure_tz
