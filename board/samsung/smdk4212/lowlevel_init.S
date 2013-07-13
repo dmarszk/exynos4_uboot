@@ -161,7 +161,7 @@ after_copy:
 	
 	mov r6, #0	
 1:
-	ldr r5, =TZSW_MEM_ADDR
+	ldr r5, =0x2028000
 	ldrb r4, [r5, r6]
 	
 	UBFX    R0, R4, #4, #4

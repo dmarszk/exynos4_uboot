@@ -78,9 +78,9 @@ int i;
 #ifdef CONFIG_TRUSTZONE
 	for(i = 0; i < 100; i++)
 	{
-		*((u32*)(TZSW_MEM_ADDR)+i) = 0;
+		*((u32*)(0x2028000)+i) = 0xBAADD00D;
 	}
-	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_TZSW_BLKCNT, TZSW_MEM_ADDR);
+	SDMMC_ReadBlocks(MOVI_UBOOT_POS, 1, 0x2028000);
 #endif
 #else
 	copy_sd_mmc_to_mem copy_uboot = (copy_sd_mmc_to_mem)(0x00002488);
