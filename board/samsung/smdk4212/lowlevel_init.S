@@ -161,7 +161,7 @@ after_copy:
 	
 	mov r1, #0	
 1:
-	ldr r2, =TZSW_MEM_ADDR
+	ldr r2, =CONFIG_PHY_UBOOT_BASE
 	ldrb r4, [r2, r1]
 	
 	UBFX    R0, R4, #4, #4
@@ -199,7 +199,7 @@ board_init_wrapper:
 	mcr	p15, 0, r0, c8, c7, 0 /* Write TLBIALL - Invalidate entire Unified TLB */
 	mcr	p15, 0, r0, c7, c5, 0 /* Write ICIALLU - Invalidate Instruction Cache */
 	mrc	p15, 0, r0, c1, c0, 0
-	bic	r0, r0, #0x00002000	/* clear bits 13, 9:8 (--V- ----) */
+	bic	r0, r0, #0x00002000	/* clear bit 13 (--V- ----) */
 	bic	r0, r0, #0x00000007	/* clear bits 2:0 (---- -CAM) */
 	orr	r0, r0, #0x00000002	/* set bit 2 (A) Align */
 	orr	r0, r0, #0x00000800	/* set bit 11 (Z) Flow prediction */
