@@ -177,8 +177,8 @@ after_copy:
 	bl uart_putc
 	MOV r0, #' '
 	bl uart_putc
-	add r5, #1
-	cmp r5, #20
+	add r6, #1
+	cmp r6, #20
 	ble 1b
 	
 #ifdef CONFIG_TRUSTZONE
