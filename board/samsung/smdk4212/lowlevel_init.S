@@ -161,7 +161,7 @@ after_copy:
 	
 	mov r6, #0	
 1:
-	ldr r5, =CONFIG_PHY_UBOOT_BASE
+	ldr r5, =CFG_FASTBOOT_TRANSFER_BUFFER
 	ldrb r4, [r5, r6]
 	
 	UBFX    R0, R4, #4, #4

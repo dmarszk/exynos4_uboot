@@ -54,7 +54,6 @@ typedef u32(*MSH_ReadFromFIFO_eMMC)
 typedef u32(*MSH_EndBootOp_eMMC)
 (void);
 
-#ifdef CONFIG_CORTEXA5_ENABLE
 void * uboot_memcpy(void * dest,const void *src,size_t count)
 {
 	char *tmp = (char *) dest, *s = (char *) src;
@@ -64,7 +63,6 @@ void * uboot_memcpy(void * dest,const void *src,size_t count)
 
 	return dest;
 }
-#endif
 
 void movi_uboot_copy(void)
 {
@@ -75,12 +73,14 @@ int i;
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, 0x40000000);
 #endif
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
+	
 #ifdef CONFIG_TRUSTZONE
 	for(i = 0; i < 100; i++)
 	{
 		*((u32*)(0x2028000)+i) = 0xBAADD00D;
 	}
-	SDMMC_ReadBlocks(MOVI_UBOOT_POS, 1, 0x2028000);
+	SDMMC_ReadBlocks(MOVI_TZSW_POS, 0x20, CFG_FASTBOOT_TRANSFER_BUFFER);
+	uboot_memcpy(TZSW_MEM_ADDR,CFG_FASTBOOT_TRANSFER_BUFFER,PART_SIZE_TZSW);
 #endif
 #else
 	copy_sd_mmc_to_mem copy_uboot = (copy_sd_mmc_to_mem)(0x00002488);
