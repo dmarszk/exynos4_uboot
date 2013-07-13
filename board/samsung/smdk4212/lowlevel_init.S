@@ -180,6 +180,28 @@ after_copy:
 	add r6, #1
 	cmp r6, #8
 	ble 1b
+	
+	mov r6, #0
+	ldr r5, =(TZSW_MEM_ADDR)
+1:
+	ldrb r4, [r5, r6]
+	
+	UBFX    R0, R4, #4, #4
+	CMP     R0, #10
+	ADDCC   R0, R0, #48
+	ADDCS   R0, R0, #55
+	BL      uart_putc
+
+	UBFX    R0, R4, #0, #4
+	CMP     R0, #10
+	ADDCC   R0, R0, #48
+	ADDCS   R0, R0, #55
+	bl uart_putc
+	MOV r0, #' '
+	bl uart_putc
+	add r6, #1
+	cmp r6, #8
+	ble 1b
 #ifdef CONFIG_TRUSTZONE
 	ldr r0, =TZ_PARAMS_ADDR
 	bl configure_tz
