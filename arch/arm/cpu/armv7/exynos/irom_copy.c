@@ -74,7 +74,7 @@ void movi_uboot_copy(void)
 #endif
 	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, CONFIG_PHY_UBOOT_BASE);
 #ifdef CONFIG_TRUSTZONE
-	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_UBOOT_BLKCNT, TZSW_MEM_ADDR);
+	SDMMC_ReadBlocks(MOVI_UBOOT_POS, MOVI_TZSW_BLKCNT, TZSW_MEM_ADDR);
 #endif
 #else
 	copy_sd_mmc_to_mem copy_uboot = (copy_sd_mmc_to_mem)(0x00002488);
