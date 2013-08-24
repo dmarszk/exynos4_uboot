@@ -47,7 +47,7 @@
 #define CONFIG_EXYNOS4_GALAXY
 
 /* We need trustzone to be compatible with stock kernels, built with TRUSTZONE support. */
-#define CONFIG_TRUSTZONE
+//#define CONFIG_TRUSTZONE
 #define CONFIG_TRUSTZONE_RESERVED_DRAM	0x100000
 #define TZSW_MEM_ADDR 0x02028000
 #define TZ_PARAMS_ADDR 0x0204F800
