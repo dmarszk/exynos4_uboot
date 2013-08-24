@@ -290,6 +290,14 @@ int board_late_init (void)
 
 int board_mmc_init(bd_t *bis)
 {
+	int i;
+	printf("...Time to turn eMMC back on...\n");
+	for(i = 10; i > 0; i--)
+	{
+		printf("%d ", i);
+		udelay(1000000);
+	}
+	printf("\n");
 #ifdef CONFIG_S3C_HSMMC
 	setup_hsmmc_clock();
 	setup_hsmmc_cfg_gpio();
